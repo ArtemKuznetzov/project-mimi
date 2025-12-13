@@ -25,13 +25,13 @@ project-mimi/
 
 ### Backend Services
 
-#### [API Gateway](./project-mimi-server/api-gateway/README-server.md)
+#### [API Gateway](./project-mimi-server/api-gateway/README.md)
 
 - **Tech Stack**: Spring Cloud Gateway, Spring WebFlux
 - **Port**: 4004
 - **Purpose**: Routes requests to microservices and validates JWT tokens
 
-#### [Auth Service](./project-mimi-server/auth-service/README-server.md)
+#### [Auth Service](./project-mimi-server/auth-service/README.md)
 
 - **Tech Stack**: Spring Boot, Spring Security, JWT
 - **Port**: 4005
@@ -149,6 +149,6 @@ API Gateway (4004)
 ## Documentation
 
 - [Frontend README](./project-mimi-ui/README.md)
-- [API Gateway README](./project-mimi-server/api-gateway/README-server.md)
-- [Auth Service README](./project-mimi-server/auth-service/README-server.md)
+- [API Gateway README](./project-mimi-server/api-gateway/README.md)
+- [Auth Service README](./project-mimi-server/auth-service/README.md)
 
