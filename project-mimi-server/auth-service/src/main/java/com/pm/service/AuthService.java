@@ -18,6 +18,8 @@ public class AuthService {
     private final JwtUtil jwtUtil;
 
     public Optional<TokenPairDTO> authenticate(LoginRequestDTO dto) {
+        String password = passwordEncoder.encode(dto.password());
+        System.out.println(password);
         return userService.findByEmail(dto.email())
                 .filter(user -> passwordEncoder.matches(dto.password(), user.getPassword()))
                 .map(user -> generateTokenPair(user.getEmail(), user.getRole().name()));

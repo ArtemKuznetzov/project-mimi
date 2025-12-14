@@ -1,6 +1,10 @@
 server:
   port: 4004
 
+auth:
+  service:
+    url: http://localhost:4004
+
 spring:
   cloud:
     gateway:

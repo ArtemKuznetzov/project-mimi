@@ -3,16 +3,29 @@ import { logout } from '@/features/auth/model/authSlice'
 import { useAppDispatch } from '@/app/hooks'
 import { Button } from '@/shared/ui/Button/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/Card/Card'
+import { useToast } from '@/app/providers/toast'
 import { useNavigate } from 'react-router-dom'
+import {useLogoutMutation} from "@/features/auth/api/authApi.ts";
 
 export const HomePage = () => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
+  const [logoutRequest] = useLogoutMutation()
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated)
+  const toast = useToast()
 
-  const handleLogout = () => {
-    dispatch(logout())
-    navigate('/login', { replace: true })
+  const handleLogout = async () => {
+    try {
+      await logoutRequest().unwrap()
+      dispatch(logout())
+      navigate('/login', { replace: true })
+    } catch (error) {
+      console.error('Logout error:', error)
+      toast.error({
+        title: 'Logout Error',
+        description: 'Failed to logout. Please try again.',
+      })
+    }
   }
 
   return (

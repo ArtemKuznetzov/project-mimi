@@ -12,4 +12,5 @@ export {
   CardDescription,
   CardContent,
 } from './Card/Card'
+export { Toast } from './Toast'
 
