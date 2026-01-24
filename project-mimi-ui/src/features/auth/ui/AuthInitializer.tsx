@@ -1,30 +1,15 @@
-import React, { useEffect, useState, useRef } from 'react'
-import { useAppDispatch, useAppSelector } from '@/app/hooks'
+import React, { useEffect, useState } from 'react'
+import { useAppDispatch } from '@/app/hooks'
 import { useRefreshTokenMutation } from '../api/authApi'
 import { logout, setAccessToken } from '@/features/auth'
 
 export const AuthInitializer = ({ children }: { children: React.ReactNode }) => {
   const dispatch = useAppDispatch()
-  const accessToken = useAppSelector((state) => state.auth.accessToken)
   const [isInitialized, setIsInitialized] = useState(false)
   const [refreshTokenMutation] = useRefreshTokenMutation()
-  const hasRestored = useRef(false)
 
   useEffect(() => {
-    // Prevent two similar requests
-    if (hasRestored.current) {
-      return
-    }
-
     const restoreSession = async () => {
-      if (accessToken) {
-        setIsInitialized(true)
-        hasRestored.current = true
-        return
-      }
-
-      hasRestored.current = true
-
       try {
         const result = await refreshTokenMutation().unwrap()
         

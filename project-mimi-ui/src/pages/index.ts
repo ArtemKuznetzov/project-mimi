@@ -1,3 +1,5 @@
 export { LoginPage } from './LoginPage'
-export { HomePage } from './HomePage'
+export { ProfilePage } from './ProfilePage'
+export { FeedPage } from './FeedPage'
+export { MessagesPage } from './MessagesPage'
 

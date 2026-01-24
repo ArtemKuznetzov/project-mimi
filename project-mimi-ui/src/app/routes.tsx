@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import type { ReactNode } from 'react'
-import { LoginPage } from '@/pages/LoginPage'
-import { HomePage } from '@/pages/HomePage'
+import { LoginPage, FeedPage, MessagesPage, ProfilePage } from '@/pages'
+import { AppLayout } from './layouts/AppLayout'
 import { useAppSelector } from './hooks'
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
@@ -11,7 +11,7 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 
 const PublicRoute = ({ children }: { children: ReactNode }) => {
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated)
-  return !isAuthenticated ? <>{children}</> : <Navigate to="/" replace />
+  return !isAuthenticated ? <>{children}</> : <Navigate to="/feed" replace />
 }
 
 export const AppRoutes = () => {
@@ -29,11 +29,16 @@ export const AppRoutes = () => {
         path="/"
         element={
           <ProtectedRoute>
-            <HomePage />
+            <AppLayout />
           </ProtectedRoute>
         }
-      />
-      <Route path="*" element={<Navigate to="/" replace />} />
+      >
+        <Route index element={<Navigate to="feed" replace />} />
+        <Route path="feed" element={<FeedPage />} />
+        <Route path="messages" element={<MessagesPage />} />
+        <Route path="profile" element={<ProfilePage />} />
+      </Route>
+      <Route path="*" element={<Navigate to="/feed" replace />} />
     </Routes>
   )
 }
