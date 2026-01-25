@@ -1,8 +1,9 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import type { ReactNode } from 'react'
-import { LoginPage, FeedPage, MessagesPage, ProfilePage } from '@/pages'
+import { LoginPage, FeedPage, DialoguesPage, ProfilePage } from '@/pages'
 import { AppLayout } from './layouts/AppLayout'
 import { useAppSelector } from './hooks'
+import { MessagesPage } from "@/pages/MessagesPage";
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated)
@@ -35,8 +36,9 @@ export const AppRoutes = () => {
       >
         <Route index element={<Navigate to="feed" replace />} />
         <Route path="feed" element={<FeedPage />} />
-        <Route path="messages" element={<MessagesPage />} />
+        <Route path="messages" element={<DialoguesPage />} />
         <Route path="profile" element={<ProfilePage />} />
+        <Route path="messages/:dialogueId" element={<MessagesPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/feed" replace />} />
     </Routes>

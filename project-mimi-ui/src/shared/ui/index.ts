@@ -13,4 +13,5 @@ export {
   CardContent,
 } from './Card/Card'
 export { Toast } from './Toast'
+export { UserAvatar } from './UserAvatar/UserAvatar'
 
