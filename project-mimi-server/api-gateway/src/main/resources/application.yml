@@ -3,7 +3,7 @@ server:
 
 auth:
   service:
-    url: http://localhost:4004
+    url: http://localhost:4005
 
 spring:
   cloud:
@@ -18,25 +18,25 @@ spring:
           filters:
             - StripPrefix=1
 
-        ## REST CLIENT -> http://localhost:4004/api/games
-        ## API GATEWAY -> http://online-shop-service:4000/games
-        ## PARENT SERVICE (SPRING BOOT APP) -> /shop -> Games Array
-        - id: online-shop-service-route
-          uri: http://games-service:4000
+        ## REST CLIENT -> http://localhost:4004/api/chat
+        ## API GATEWAY -> http://chat-service:4000/chat
+        ## PARENT SERVICE (SPRING BOOT APP) -> /chat -> Chat Array
+        - id: chat-service-route
+          uri: http://chat-service:4000
           predicates:
-            - Path=/api/games/**
+            - Path=/api/chat/**
           filters:
             - StripPrefix=1
             - JwtValidation
 
-          ## REST-CLIENT -> http://localhost:4004/api-docs/games
-          ## API-GATEWAY -> http://online-shop-service:4000/v3/api-docs
-        - id: api-docs-online-shop-route
-          uri: http://online-shop-service:4000
+          ## REST-CLIENT -> http://localhost:4004/api-docs/chat
+          ## API-GATEWAY -> http://chat-service:4000/v3/api-docs
+        - id: api-docs-chat-route
+          uri: http://chat-service:4000
           predicates:
-            - Path=/api-docs/games
+            - Path=/api-docs/chat
           filters:
-            - RewritePath=/api-docs/games,/v3/api-docs
+            - RewritePath=/api-docs/chat,/v3/api-docs
 
         - id: api-docs-auth-route
           uri: http://auth-service:4005
