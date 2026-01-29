@@ -1,5 +1,6 @@
-package com.pm.model;
+package com.pm.entity;
 
+import com.pm.enums.UserRole;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -25,6 +26,13 @@ public class User {
     @Column(nullable = false, length = 255)
     @NotBlank(message = "Password is required")
     private String password;
+
+    @Column(name = "display_name", nullable = false, length = 100)
+    @NotBlank(message = "Display name is required")
+    private String displayName;
+
+    @Column(name = "avatar_url")
+    private String avatarUrl;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)

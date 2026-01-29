@@ -1,0 +1,65 @@
+services:
+  auth-service-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: db
+      POSTGRES_USER: admin_user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5001:5432"
+    volumes:
+      - auth-service-db-data:/var/lib/postgresql/data
+
+  chat-service-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: db
+      POSTGRES_USER: admin_user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5002:5432"
+    volumes:
+      - chat-service-db-data:/var/lib/postgresql/data
+
+  auth-service:
+    build:
+      context: ./auth-service
+    environment:
+      DB_URL: jdbc:postgresql://auth-service-db:5432/db
+      DB_USERNAME: admin_user
+      DB_PASSWORD: password
+      JWT_SECRET: J9l6i2WkB0aV7V9qk7sU9vZjH2Q2nV6mT4r8fD0oX5b1hE7qZ1u3cC4wL8yP9aM0
+    ports:
+      - "4005:4005"
+    depends_on:
+      - auth-service-db
+
+  chat-service:
+    build:
+      context: ./chat-service
+    environment:
+      DB_URL: jdbc:postgresql://chat-service-db:5432/db
+      DB_USERNAME: admin_user
+      DB_PASSWORD: password
+    ports:
+      - "4000:4000"
+    depends_on:
+      - chat-service-db
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+    environment:
+      AUTH_SERVICE_URL: http://auth-service:4005
+      AUTH_SERVICE_URI: http://auth-service:4005
+      CHAT_SERVICE_URI: http://chat-service:4000
+    ports:
+      - "4004:4004"
+    depends_on:
+      - auth-service
+      - chat-service
+
+volumes:
+  auth-service-db-data:
+  chat-service-db-data:
+

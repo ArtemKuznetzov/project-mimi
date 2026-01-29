@@ -14,7 +14,7 @@ public class TokenValidationService {
     private final UserService userService;
 
     public TokenValidationResult validate(String token) {
-        jwtUtil.validateToken(token);
+        jwtUtil.validateAccessToken(token);
 
         String email = jwtUtil.getEmailFromToken(token);
         String role = jwtUtil.getRoleFromToken(token);

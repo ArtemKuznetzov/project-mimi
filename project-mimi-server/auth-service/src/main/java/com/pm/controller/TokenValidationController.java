@@ -1,6 +1,7 @@
 package com.pm.controller;
 
 import com.pm.dto.TokenValidationResult;
+import com.pm.exception.UnauthorizedException;
 import com.pm.service.TokenValidationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -21,7 +22,10 @@ public class TokenValidationController {
     public ResponseEntity<TokenValidationResult> validate(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader
     ) {
-        String token = authHeader.replace("Bearer ", "");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new UnauthorizedException("Missing or invalid Authorization header");
+        }
+        String token = authHeader.substring("Bearer ".length());
         return ResponseEntity.ok(validationService.validate(token));
     }
 }

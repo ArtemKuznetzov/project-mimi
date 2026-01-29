@@ -1,6 +1,7 @@
 package com.pm.exception;
 
 import com.pm.dto.ErrorResponseDTO;
+import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<Void> handleUnauthorized(UnauthorizedException e) {
         log.warn("Unauthorized access attempt: {}", e.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<Void> handleJwtException(JwtException e) {
+        log.warn("Invalid JWT: {}", e.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 

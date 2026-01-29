@@ -1,6 +1,6 @@
 package com.pm.service;
 
-import com.pm.model.User;
+import com.pm.entity.User;
 import com.pm.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

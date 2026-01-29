@@ -12,7 +12,9 @@ RUN mvn clean package
 
 FROM eclipse-temurin:21-jdk AS runner
 
-COPY --from=builder ./app/target/chat-service-0.0.1-SNAPSHOT.jar ./app/jar
+WORKDIR /app
+
+COPY --from=builder /app/target/*.jar /app/app.jar
 
 EXPOSE 4000
 

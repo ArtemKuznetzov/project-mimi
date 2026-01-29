@@ -1,4 +1,4 @@
-package com.pm.model;
+package com.pm.enums;
 
 public enum UserRole {
     USER,

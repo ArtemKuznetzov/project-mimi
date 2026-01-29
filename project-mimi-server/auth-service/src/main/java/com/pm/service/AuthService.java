@@ -25,7 +25,7 @@ public class AuthService {
     }
 
     public Optional<TokenPairDTO> refreshTokens(String refreshToken) {
-        if (!jwtUtil.isValidToken(refreshToken)) {
+        if (!jwtUtil.isRefreshToken(refreshToken)) {
             return Optional.empty();
         }
 

@@ -24,8 +24,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(
-            HttpServletRequest request,
-            @NonNull  HttpServletResponse response,
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
 
         if (request.getServletPath().equals("/validate")) {
@@ -35,7 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = extractToken(request);
 
-        if (token != null && jwtUtil.isValidToken(token)) {
+        if (token != null && jwtUtil.isAccessToken(token)) {
             String email = jwtUtil.getEmailFromToken(token);
             String role = jwtUtil.getRoleFromToken(token);
 
