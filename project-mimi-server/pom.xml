@@ -11,6 +11,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>common-web</module>
         <module>api-gateway</module>
         <module>auth-service</module>
         <module>chat-service</module>

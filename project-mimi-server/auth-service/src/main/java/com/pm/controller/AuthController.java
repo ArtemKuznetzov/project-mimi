@@ -4,7 +4,7 @@ import com.pm.config.RefreshTokenCookieService;
 import com.pm.dto.LoginRequestDTO;
 import com.pm.dto.LoginResponseDTO;
 import com.pm.dto.TokenPairDTO;
-import com.pm.exception.UnauthorizedException;
+import com.pm.common.web.exception.UnauthorizedException;
 import com.pm.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletResponse;

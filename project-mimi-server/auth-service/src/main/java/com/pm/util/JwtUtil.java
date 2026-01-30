@@ -18,6 +18,7 @@ import java.util.Date;
 public class JwtUtil {
 
     private static final String ROLE_CLAIM = "role";
+    private static final String USER_ID_CLAIM = "user_id";
     private static final String TOKEN_TYPE_CLAIM = "token_type";
     private static final String TOKEN_TYPE_ACCESS = "access";
     private static final String TOKEN_TYPE_REFRESH = "refresh";
@@ -32,20 +33,21 @@ public class JwtUtil {
         this.secretKey = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateAccessToken(String email, String role) {
-        return generateToken(email, role, TOKEN_TYPE_ACCESS, ACCESS_TOKEN_EXPIRATION);
+    public String generateAccessToken(Long userId, String role) {
+        return generateToken(userId, role, TOKEN_TYPE_ACCESS, ACCESS_TOKEN_EXPIRATION);
     }
 
-    public String generateRefreshToken(String email, String role) {
-        return generateToken(email, role, TOKEN_TYPE_REFRESH, REFRESH_TOKEN_EXPIRATION);
+    public String generateRefreshToken(Long userId, String role) {
+        return generateToken(userId, role, TOKEN_TYPE_REFRESH, REFRESH_TOKEN_EXPIRATION);
     }
 
-    private String generateToken(String email, String role, String tokenType, Duration expiration) {
+    private String generateToken(Long userId, String role, String tokenType, Duration expiration) {
         Instant now = Instant.now();
         Instant expirationTime = now.plus(expiration);
 
         return Jwts.builder()
-                .subject(email)
+                .subject(String.valueOf(userId))
+                .claim(USER_ID_CLAIM, userId)
                 .claim(ROLE_CLAIM, role)
                 .claim(TOKEN_TYPE_CLAIM, tokenType)
                 .issuedAt(Date.from(now))
@@ -93,8 +95,21 @@ public class JwtUtil {
         }
     }
 
-    public String getEmailFromToken(String token) {
-        return parseSignedClaims(token).getSubject();
+    public Long getUserIdFromToken(String token) {
+        Claims claims = parseSignedClaims(token);
+        Number userId = claims.get(USER_ID_CLAIM, Number.class);
+        if (userId != null) {
+            return userId.longValue();
+        }
+        String subject = claims.getSubject();
+        if (subject == null || subject.isBlank()) {
+            return null;
+        }
+        try {
+            return Long.parseLong(subject);
+        } catch (NumberFormatException ex) {
+            return null;
+        }
     }
 
     public String getRoleFromToken(String token) {

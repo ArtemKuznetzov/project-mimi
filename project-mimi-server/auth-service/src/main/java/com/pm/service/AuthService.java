@@ -21,7 +21,7 @@ public class AuthService {
 //        System.out.println(passwordEncoder.encode("mifamifa"));
         return userService.findByEmail(dto.email())
                 .filter(user -> passwordEncoder.matches(dto.password(), user.getPassword()))
-                .map(user -> generateTokenPair(user.getEmail(), user.getRole().name()));
+                .map(user -> generateTokenPair(user.getId(), user.getRole().name()));
     }
 
     public Optional<TokenPairDTO> refreshTokens(String refreshToken) {
@@ -29,16 +29,19 @@ public class AuthService {
             return Optional.empty();
         }
 
-        String email = jwtUtil.getEmailFromToken(refreshToken);
+        Long userId = jwtUtil.getUserIdFromToken(refreshToken);
+        if (userId == null) {
+            return Optional.empty();
+        }
 
-        return userService.findByEmail(email)
-                .map(user -> generateTokenPair(email, user.getRole().name()));
+        return userService.findById(userId)
+                .map(user -> generateTokenPair(user.getId(), user.getRole().name()));
     }
 
-    private TokenPairDTO generateTokenPair(String email, String role) {
+    private TokenPairDTO generateTokenPair(Long userId, String role) {
         return new TokenPairDTO(
-                jwtUtil.generateAccessToken(email, role),
-                jwtUtil.generateRefreshToken(email, role)
+                jwtUtil.generateAccessToken(userId, role),
+                jwtUtil.generateRefreshToken(userId, role)
         );
     }
 }

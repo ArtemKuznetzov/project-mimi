@@ -1,7 +1,7 @@
 package com.pm.controller;
 
 import com.pm.dto.TokenValidationResult;
-import com.pm.exception.UnauthorizedException;
+import com.pm.common.web.exception.UnauthorizedException;
 import com.pm.service.TokenValidationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;

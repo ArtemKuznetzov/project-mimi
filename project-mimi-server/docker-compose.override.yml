@@ -1,0 +1,8 @@
+services:
+  auth-service-db:
+    ports:
+      - "127.0.0.1:5001:5432"
+
+  chat-service-db:
+    ports:
+      - "127.0.0.1:5002:5432"

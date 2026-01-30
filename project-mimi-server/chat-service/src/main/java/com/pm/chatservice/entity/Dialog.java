@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "dialogs")
@@ -27,5 +29,9 @@ public class Dialog {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "dialog")
+    @Builder.Default
+    private Set<DialogParticipant> participants = new HashSet<>();
 }
 

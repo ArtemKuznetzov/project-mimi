@@ -34,8 +34,10 @@ public class JwtValidationGatewayFilterFactory extends AbstractGatewayFilterFact
                     .flatMap(result -> {
                         var mutatedRequest = exchange.getRequest()
                                 .mutate()
-                                .header("X-User-Id", result.userId().toString())
-                                .header("X-User-Role", result.role())
+                                .headers(headers -> {
+                                    headers.set("X-User-Id", result.userId().toString());
+                                    headers.set("X-User-Role", result.role());
+                                })
                                 .build();
 
                         return chain.filter(

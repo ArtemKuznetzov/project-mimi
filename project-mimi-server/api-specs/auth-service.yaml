@@ -1,0 +1,79 @@
+openapi: 3.0.3
+info:
+  title: Auth Service API
+  version: 1.0.0
+paths:
+  /users/{id}:
+    get:
+      operationId: getUserPublicInfo
+      summary: Get public user info
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPublicDTO"
+        "404":
+          description: Not Found
+      security:
+        - bearerAuth: []
+  /validate:
+    get:
+      operationId: validateToken
+      summary: Validate access token
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenValidationResult"
+        "401":
+          description: Unauthorized
+      security:
+        - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    TokenValidationResult:
+      type: object
+      required:
+        - userId
+        - email
+        - role
+      properties:
+        userId:
+          type: integer
+          format: int64
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+    UserPublicDTO:
+      type: object
+      required:
+        - id
+        - displayName
+      properties:
+        id:
+          type: integer
+          format: int64
+        displayName:
+          type: string
+        avatarUrl:
+          type: string
+          nullable: true
+
