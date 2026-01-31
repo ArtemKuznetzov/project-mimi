@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.reactive.CorsWebFilter;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
@@ -27,11 +27,10 @@ public class CorsConfig {
     private static final long MAX_AGE = 3600L; // 1 hour
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource(
+    public CorsWebFilter corsWebFilter(
             @Value("${cors.allowed-origins}") List<String> allowedOrigins) {
 
         CorsConfiguration config = new CorsConfiguration();
-
         config.setAllowedOrigins(allowedOrigins);
         config.setAllowedMethods(ALLOWED_METHODS);
         config.setAllowedHeaders(ALLOWED_HEADERS);
@@ -40,6 +39,6 @@ public class CorsConfig {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
-        return source;
+        return new CorsWebFilter(source);
     }
 }

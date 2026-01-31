@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS dialogs (
 CREATE TABLE IF NOT EXISTS dialog_participants (
     dialog_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
-    role VARCHAR(20) NOT NULL DEFAULT 'member',
+    role VARCHAR(20) NOT NULL DEFAULT 'MEMBER',
     joined_at TIMESTAMP NOT NULL DEFAULT NOW(),
     PRIMARY KEY (dialog_id, user_id),
     FOREIGN KEY (dialog_id) REFERENCES dialogs(id) ON DELETE CASCADE

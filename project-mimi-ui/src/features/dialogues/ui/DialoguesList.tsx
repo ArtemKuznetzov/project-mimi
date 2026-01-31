@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
 import { UserAvatar } from "@/shared/ui";
-import type { Dialogue } from "@/entities/dialogue";
+import type { DialogResponseDTO } from "@/shared/api/generated";
 
-export const DialoguesList = ({ dialogues }: { dialogues: Dialogue[] }) => {
+export const DialoguesList = ({ dialogues }: { dialogues: DialogResponseDTO[] }) => {
   if (dialogues.length === 0) {
     return (
       <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
@@ -23,16 +23,16 @@ export const DialoguesList = ({ dialogues }: { dialogues: Dialogue[] }) => {
               <div className="flex gap-4">
                 <div>
                   <UserAvatar
-                    src={dialogue.user.imgSrc}
-                    alt={dialogue.user.name}
+                    src={dialogue.userAvatarUrl}
+                    alt={dialogue.userName}
                   />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{dialogue.user.name}</h3>
-                  <p className="text-sm text-muted-foreground">{dialogue.lastMessage}</p>
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">{dialogue.userName}</h3>
+                  <p className="text-sm text-muted-foreground">{dialogue.lastMessageBody}</p>
                 </div>
               </div>
-              <div className="text-xs text-muted-foreground">{dialogue.timestamp}</div>
+              <div className="text-xs text-muted-foreground">{dialogue.lastMessageDate}</div>
             </div>
           </Link>
         </li>

@@ -1,19 +1,21 @@
 import { useMemo, useState } from 'react'
 import { DialoguesHeader } from '@/features/dialogues/ui/DialoguesHeader.tsx'
 import { DialoguesList } from '@/features/dialogues/ui/DialoguesList.tsx'
-import { DIALOGUES } from "@/entities/dialogue";
+import { useGetDialogsQuery } from "@/features/dialogues/api/dialogsApi.ts";
 
 export const DialoguesPage = () => {
   const [isSearchMode, setIsSearchMode] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
+  const { data: dialogsData = [] } = useGetDialogsQuery()
+
   const filteredDialogues = useMemo(() => {
     if (!searchQuery.trim()) {
-      return DIALOGUES
+      return dialogsData
     }
     const query = searchQuery.toLowerCase()
-    return DIALOGUES.filter((message) => message.user.name.toLowerCase().includes(query))
-  }, [searchQuery])
+    return dialogsData.filter((message) => (message.userName ?? '').toLowerCase().includes(query))
+  }, [dialogsData, searchQuery])
 
   const handleSearchToggle = () => {
     setIsSearchMode((prev) => !prev)

@@ -2,6 +2,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useLoginMutation } from '../api/authApi'
+import type { LoginRequestDTO } from '@/shared/api/generated'
 import { setAccessToken } from '@/features/auth'
 import { useAppDispatch } from '@/app/hooks'
 import { useNavigate } from 'react-router-dom'
@@ -14,9 +15,7 @@ import { useState, useRef } from 'react'
 const loginSchema = z.object({
   email: z.email('Invalid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
-})
-
-type LoginFormData = z.infer<typeof loginSchema>
+}) satisfies z.ZodType<LoginRequestDTO>
 
 export const LoginForm = () => {
   const dispatch = useAppDispatch()
@@ -29,11 +28,11 @@ export const LoginForm = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<LoginFormData>({
+  } = useForm<LoginRequestDTO>({
     resolver: zodResolver(loginSchema),
   })
 
-  const onSubmit = async (data: LoginFormData) => {
+  const onSubmit = async (data: LoginRequestDTO) => {
     const now = Date.now() // Spam protection
     const timeSinceLastSubmit = now - lastSubmitTime.current
     

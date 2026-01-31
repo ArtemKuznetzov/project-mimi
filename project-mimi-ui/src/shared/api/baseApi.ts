@@ -2,10 +2,12 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { RootState } from '@/app/store'
 import { logout, setAccessToken } from '@/features/auth/model/authSlice'
-import type { RefreshTokenResponse } from '@/features/auth/api/authApi'
+import type { LoginResponseDTO } from '@/shared/api/generated'
+
+const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4004'
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:4005',
+  baseUrl,
   credentials: 'include',
   prepareHeaders: (headers, { getState }) => {
     const accessToken = (getState() as RootState).auth.accessToken
@@ -26,11 +28,11 @@ const baseQueryWithReauth: BaseQueryFn<
   if (result.error && 'status' in result.error && result.error.status === 401) {
     try {
       const refreshResult = await fetchBaseQuery({
-        baseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:4005',
+        baseUrl,
         credentials: 'include',
       })(
         {
-          url: '/refresh',
+          url: '/auth/refresh',
           method: 'POST',
         },
         api,
@@ -38,7 +40,7 @@ const baseQueryWithReauth: BaseQueryFn<
       )
       
       if (refreshResult.data) {
-        const { accessToken } = refreshResult.data as RefreshTokenResponse
+        const { accessToken } = refreshResult.data as LoginResponseDTO
 
         if (accessToken && accessToken.trim() !== '') {
           api.dispatch(setAccessToken(accessToken))

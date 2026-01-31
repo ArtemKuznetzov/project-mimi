@@ -23,7 +23,8 @@ services:
 
   auth-service:
     build:
-      context: ./auth-service
+      context: .
+      dockerfile: auth-service/Dockerfile
     environment:
       DB_URL: jdbc:postgresql://auth-service-db:5432/db
       DB_USERNAME: admin_user
@@ -36,7 +37,8 @@ services:
 
   chat-service:
     build:
-      context: ./chat-service
+      context: .
+      dockerfile: chat-service/Dockerfile
     environment:
       DB_URL: jdbc:postgresql://chat-service-db:5432/db
       DB_USERNAME: admin_user
@@ -48,7 +50,8 @@ services:
 
   api-gateway:
     build:
-      context: ./api-gateway
+      context: .
+      dockerfile: api-gateway/Dockerfile
     environment:
       AUTH_SERVICE_URL: http://auth-service:4005
       AUTH_SERVICE_URI: http://auth-service:4005

@@ -2,19 +2,24 @@ FROM maven:3.9.9-eclipse-temurin-21 AS builder
 
 WORKDIR /app
 
-COPY pom.xml .
+COPY pom.xml ./pom.xml
 
-RUN mvn dependency:go-offline -B
+COPY common-web ./common-web
 
-COPY src ./src
+COPY auth-service/pom.xml ./auth-service/pom.xml
+COPY auth-service/src ./auth-service/src
 
-RUN mvn clean package
+WORKDIR /app/common-web
+RUN mvn clean install -DskipTests
+
+WORKDIR /app/auth-service
+RUN mvn clean package -DskipTests
 
 FROM eclipse-temurin:21-jdk AS runner
 
 WORKDIR /app
 
-COPY --from=builder /app/target/*.jar /app/app.jar
+COPY --from=builder /app/auth-service/target/*.jar /app/app.jar
 
 EXPOSE 4005
 

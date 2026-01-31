@@ -1,51 +1,45 @@
 import { baseApi } from '@/shared/api/baseApi'
-
-export interface LoginRequest {
-  email: string
-  password: string
-}
-
-export interface LoginResponse {
-  accessToken: string
-}
-
-export interface RefreshTokenResponse {
-  accessToken: string
-}
+import type { LoginRequestDTO, LoginResponseDTO, TokenValidationResult, UserPublicDTO } from '@/shared/api/generated'
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    login: builder.mutation<LoginResponse, LoginRequest>({
+    login: builder.mutation<LoginResponseDTO, LoginRequestDTO>({
       query: (credentials) => ({
-        url: '/login',
+        url: '/auth/login',
         method: 'POST',
         body: credentials,
       }),
     }),
-    validateToken: builder.query<void, void>({
+    validateToken: builder.query<TokenValidationResult, void>({
       query: () => ({
-        url: '/validate',
+        url: '/auth/validate',
         method: 'GET',
       }),
     }),
-    refreshToken: builder.mutation<RefreshTokenResponse, void>({
+    refreshToken: builder.mutation<LoginResponseDTO, void>({
       query: () => ({
-        url: '/refresh',
+        url: '/auth/refresh',
         method: 'POST',
       }),
     }),
     logout: builder.mutation<void, void>({
       query: () => ({
-        url: "/logout",
+        url: "/auth/logout",
         method: "POST"
       })
-    })
+    }),
+    getUser: builder.query<UserPublicDTO, { id: number }>({
+      query: ({ id }) => ({
+        url: `/auth/users/${id}`,
+        method: 'GET',
+      }),
+    }),
   }),
 })
 
 export const {
   useLoginMutation,
   useRefreshTokenMutation,
-  useLogoutMutation
+  useLogoutMutation,
 } = authApi
 

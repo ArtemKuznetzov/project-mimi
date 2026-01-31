@@ -11,7 +11,9 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "generate:api-types": "node scripts/generate-api-types.mjs",
+    "generate:api-types:local": "USE_LOCAL_SPECS=true node scripts/generate-api-types.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -54,6 +56,7 @@
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.2.0",
     "lucide-react": "^0.560.0",
+    "openapi-typescript": "^7.10.1",
     "playwright": "^1.57.0",
     "postcss": "^8.5.6",
     "storybook": "^10.1.7",
