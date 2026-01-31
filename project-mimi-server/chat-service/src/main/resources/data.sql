@@ -1,6 +1,8 @@
 CREATE TABLE IF NOT EXISTS dialogs (
     id BIGSERIAL PRIMARY KEY,
     last_message_id BIGINT,
+    title VARCHAR(255),
+    avatar_url TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );

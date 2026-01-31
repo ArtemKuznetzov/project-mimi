@@ -30,6 +30,12 @@ public class Dialog {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "title")
+    private String title;
+
+    @Column(name = "avatar_url")
+    private String avatarUrl;
+
     @OneToMany(mappedBy = "dialog")
     @Builder.Default
     private Set<DialogParticipant> participants = new HashSet<>();
