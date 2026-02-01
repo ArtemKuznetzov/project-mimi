@@ -43,8 +43,44 @@ services:
       DB_URL: jdbc:postgresql://chat-service-db:5432/db
       DB_USERNAME: admin_user
       DB_PASSWORD: password
+      AUTH_SERVICE_URL: http://auth-service:4005
     depends_on:
       - chat-service-db
+    networks:
+      - internal
+
+  minio:
+    image: minio/minio:RELEASE.2025-02-28T09-55-16Z
+    container_name: minio
+    ports:
+      - "9000:9000"      # API port
+      - "9001:9001"      # Console port
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - internal
+
+  media-service:
+    build:
+      context: .
+      dockerfile: media-service/Dockerfile
+    environment:
+      MINIO_URL: http://minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin123
+      MINIO_BUCKET_NAME: media
+      MEDIA_SERVICE_BASE_URL: http://localhost:4004
+    depends_on:
+      - minio
     networks:
       - internal
 
@@ -56,11 +92,13 @@ services:
       AUTH_SERVICE_URL: http://auth-service:4005
       AUTH_SERVICE_URI: http://auth-service:4005
       CHAT_SERVICE_URI: http://chat-service:4000
+      MEDIA_SERVICE_URI: http://media-service:4006
     ports:
       - "4004:4004"
     depends_on:
       - auth-service
       - chat-service
+      - media-service
     networks:
       - public
       - internal
@@ -68,6 +106,7 @@ services:
 volumes:
   auth-service-db-data:
   chat-service-db-data:
+  minio_data:
 
 networks:
   internal:

@@ -1,6 +1,6 @@
 package com.pm.apigateway.filter;
 
-import com.pm.apigateway.dto.TokenValidationResult;
+import com.pm.apigateway.dto.TokenValidationResultDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -30,7 +30,7 @@ public class JwtValidationGatewayFilterFactory extends AbstractGatewayFilterFact
                     .uri("/validate")
                     .header(HttpHeaders.AUTHORIZATION, token)
                     .retrieve()
-                    .bodyToMono(TokenValidationResult.class)
+                    .bodyToMono(TokenValidationResultDTO.class)
                     .flatMap(result -> {
                         var mutatedRequest = exchange.getRequest()
                                 .mutate()

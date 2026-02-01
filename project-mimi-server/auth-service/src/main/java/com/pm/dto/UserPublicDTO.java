@@ -6,6 +6,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record UserPublicDTO(
         Long id,
         String displayName,
-        String avatarUrl
+        String avatarId
 ) {
 }

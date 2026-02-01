@@ -21,7 +21,7 @@ public class UserController {
                 .map(user -> new UserPublicDTO(
                         user.getId(),
                         user.getDisplayName(),
-                        user.getAvatarUrl()
+                        user.getAvatarId()
                 ))
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());

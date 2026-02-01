@@ -18,7 +18,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleApiException(ApiException ex, HttpServletRequest request) {
         return ResponseEntity
                 .status(ex.getStatus())
-                .body(ErrorResponse.of(ex.getStatus(), ex.getCode(), ex.getMessage(), request.getRequestURI()));
+                .body(ErrorResponse.of(ex.getStatus(), ex.getCode(), ex.getMessage(), request.getRequestURI(), ex.getDetail()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -58,7 +58,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ErrorResponse.of(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR",
-                        "Unexpected error", request.getRequestURI()));
+                        "Unexpected error", request.getRequestURI(), ex.getMessage()));
     }
 
     private FieldErrorDetail toFieldError(FieldError error) {

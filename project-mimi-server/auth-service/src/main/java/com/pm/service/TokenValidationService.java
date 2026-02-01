@@ -1,6 +1,6 @@
 package com.pm.service;
 
-import com.pm.dto.TokenValidationResult;
+import com.pm.dto.TokenValidationResultDTO;
 import com.pm.common.web.exception.UnauthorizedException;
 import com.pm.util.JwtUtil;
 import io.jsonwebtoken.JwtException;
@@ -14,7 +14,7 @@ public class TokenValidationService {
     private final JwtUtil jwtUtil;
     private final UserService userService;
 
-    public TokenValidationResult validate(String token) {
+    public TokenValidationResultDTO validate(String token) {
         try {
             jwtUtil.validateAccessToken(token);
         } catch (JwtException ex) {
@@ -30,7 +30,7 @@ public class TokenValidationService {
         var user = userService.findById(tokenUserId)
                 .orElseThrow(() -> new UnauthorizedException("User not found"));
 
-        return new TokenValidationResult(
+        return new TokenValidationResultDTO(
                 user.getId(),
                 user.getEmail(),
                 role

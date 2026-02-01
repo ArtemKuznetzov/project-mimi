@@ -15,6 +15,7 @@
         <module>api-gateway</module>
         <module>auth-service</module>
         <module>chat-service</module>
+        <module>media-service</module>
     </modules>
 
     <properties>

@@ -28,7 +28,7 @@ public class DialogService {
         return dialogDataList.stream()
                 .map(dialogData -> {
                     String userName;
-                    String userAvatarUrl;
+                    String userAvatarId;
                     Long userId;
                     
                     if (dialogData.isPrivate()) {
@@ -39,18 +39,18 @@ public class DialogService {
                         
                         userId = otherUserId;
                         userName = Optional.ofNullable(otherUser).map(UserPublicDTO::getDisplayName).orElse(null);
-                        userAvatarUrl = Optional.ofNullable(otherUser).map(UserPublicDTO::getAvatarUrl).orElse(null);
+                        userAvatarId = Optional.ofNullable(otherUser).map(UserPublicDTO::getAvatarId).orElse(null);
                     } else {
                         userId = null;
                         userName = dialogData.dialogTitle();
-                        userAvatarUrl = dialogData.dialogAvatarUrl();
+                        userAvatarId = dialogData.dialogAvatarUrl();
                     }
 
                     return new DialogResponseDTO(
                             dialogData.dialogId(),
                             userId,
                             userName,
-                            userAvatarUrl,
+                            userAvatarId,
                             dialogData.lastMessageBody(),
                             dialogData.lastMessageDate()
                     );

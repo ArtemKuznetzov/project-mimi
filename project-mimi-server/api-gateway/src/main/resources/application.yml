@@ -32,6 +32,22 @@ spring:
             - StripPrefix=1
             - JwtValidation
 
+        ## REST CLIENT -> http://localhost:4004/files/view/{id}
+        ## API GATEWAY -> http://media-service:4006/files/view/{id}
+        - id: media-service-public-route
+          uri: ${MEDIA_SERVICE_URI:http://localhost:4006}
+          predicates:
+            - Path=/files/view/**,/files/download/**
+
+        ## REST CLIENT -> http://localhost:4004/files
+        ## API GATEWAY -> http://media-service:4006/files
+        - id: media-service-route
+          uri: ${MEDIA_SERVICE_URI:http://localhost:4006}
+          predicates:
+            - Path=/files/**
+          filters:
+            - JwtValidation
+
           ## REST-CLIENT -> http://localhost:4004/api-docs/chat
           ## API-GATEWAY -> http://chat-service:4000/v3/api-docs
         - id: api-docs-chat-route
@@ -47,3 +63,10 @@ spring:
             - Path=/api-docs/auth
           filters:
             - RewritePath=/api-docs/auth,/v3/api-docs
+
+        - id: api-docs-media-route
+          uri: ${MEDIA_SERVICE_URI:http://localhost:4006}
+          predicates:
+            - Path=/api-docs/media
+          filters:
+            - RewritePath=/api-docs/media,/v3/api-docs

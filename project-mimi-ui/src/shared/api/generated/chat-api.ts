@@ -30,7 +30,7 @@ export interface components {
             /** Format: int64 */
             userId: number;
             userName: string;
-            userAvatarUrl?: string;
+            userAvatarId?: string;
             lastMessageBody?: string;
             /** Format: date-time */
             lastMessageDate?: string;

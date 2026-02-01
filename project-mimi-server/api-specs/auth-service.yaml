@@ -3,6 +3,45 @@ info:
   title: Auth Service API
   version: 1.0.0
 paths:
+  /login:
+    post:
+      operationId: login
+      summary: Generate token on user login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequestDTO"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponseDTO"
+        "401":
+          description: Unauthorized
+  /refresh:
+    post:
+      operationId: refresh
+      summary: Refresh access token
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponseDTO"
+        "401":
+          description: Unauthorized
+  /logout:
+    post:
+      operationId: logout
+      summary: Logout
+      responses:
+        "200":
+          description: OK
   /users/{id}:
     get:
       operationId: getUserPublicInfo
@@ -35,7 +74,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TokenValidationResult"
+                $ref: "#/components/schemas/TokenValidationResultDTO"
         "401":
           description: Unauthorized
       security:
@@ -47,7 +86,26 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
-    TokenValidationResult:
+    LoginRequestDTO:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+    LoginResponseDTO:
+      type: object
+      required:
+        - accessToken
+      properties:
+        accessToken:
+          type: string
+    TokenValidationResultDTO:
       type: object
       required:
         - userId
@@ -73,7 +131,7 @@ components:
           format: int64
         displayName:
           type: string
-        avatarUrl:
+        avatarId:
           type: string
           nullable: true
 

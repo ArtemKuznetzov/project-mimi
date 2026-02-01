@@ -8,7 +8,7 @@ public record DialogResponseDTO(
     Long id,
     Long userId,
     String userName,
-    String userAvatarUrl,
+    String userAvatarId,
     String lastMessageBody,
     LocalDateTime lastMessageDate
 ) {}

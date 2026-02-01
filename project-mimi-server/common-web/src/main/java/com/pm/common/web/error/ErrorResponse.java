@@ -11,10 +11,15 @@ public record ErrorResponse(
         String path,
         int status,
         Instant timestamp,
-        List<FieldErrorDetail> errors
+        List<FieldErrorDetail> errors,
+        String detail
 ) {
     public static ErrorResponse of(HttpStatus status, String code, String message, String path) {
-        return new ErrorResponse(code, message, path, status.value(), Instant.now(), null);
+        return new ErrorResponse(code, message, path, status.value(), Instant.now(), null, null);
+    }
+
+    public static ErrorResponse of(HttpStatus status, String code, String message, String path, String detail) {
+        return new ErrorResponse(code, message, path, status.value(), Instant.now(), null, detail);
     }
 
     public static ErrorResponse of(HttpStatus status,
@@ -22,6 +27,6 @@ public record ErrorResponse(
                                    String message,
                                    String path,
                                    List<FieldErrorDetail> errors) {
-        return new ErrorResponse(code, message, path, status.value(), Instant.now(), errors);
+        return new ErrorResponse(code, message, path, status.value(), Instant.now(), errors, null);
     }
 }

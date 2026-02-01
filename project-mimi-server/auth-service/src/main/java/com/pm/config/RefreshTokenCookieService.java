@@ -18,7 +18,7 @@ public class RefreshTokenCookieService {
     private final boolean secure;
 
     public RefreshTokenCookieService(
-            @Value("${cookie.secure:false}") boolean secure) {
+            @Value("${cookie.secure}") boolean secure) {
         this.secure = secure;
     }
 

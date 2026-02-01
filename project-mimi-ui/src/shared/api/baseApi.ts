@@ -3,11 +3,10 @@ import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolk
 import type { RootState } from '@/app/store'
 import { logout, setAccessToken } from '@/features/auth/model/authSlice'
 import type { LoginResponseDTO } from '@/shared/api/generated'
-
-const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4004'
+import { apiBaseUrl } from '@/shared/config/api'
 
 const baseQuery = fetchBaseQuery({
-  baseUrl,
+  baseUrl: apiBaseUrl,
   credentials: 'include',
   prepareHeaders: (headers, { getState }) => {
     const accessToken = (getState() as RootState).auth.accessToken
@@ -28,7 +27,7 @@ const baseQueryWithReauth: BaseQueryFn<
   if (result.error && 'status' in result.error && result.error.status === 401) {
     try {
       const refreshResult = await fetchBaseQuery({
-        baseUrl,
+        baseUrl: apiBaseUrl,
         credentials: 'include',
       })(
         {

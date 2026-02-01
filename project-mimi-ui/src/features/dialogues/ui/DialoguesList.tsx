@@ -23,7 +23,7 @@ export const DialoguesList = ({ dialogues }: { dialogues: DialogResponseDTO[] })
               <div className="flex gap-4">
                 <div>
                   <UserAvatar
-                    src={dialogue.userAvatarUrl}
+                    avatarId={dialogue.userAvatarId}
                     alt={dialogue.userName}
                   />
                 </div>

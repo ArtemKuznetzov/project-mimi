@@ -1,6 +1,6 @@
 package com.pm.apigateway.dto;
 
-public record TokenValidationResult(
+public record TokenValidationResultDTO(
         Long userId,
         String email,
         String role

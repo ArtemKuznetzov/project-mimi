@@ -21,7 +21,10 @@ export const MessageHeader = () => {
   return (
     <header className="flex items-center justify-between gap-4 rounded-lg border bg-white px-4 py-3 shadow-sm dark:bg-gray-900">
       <div className="flex items-center gap-4">
-        <UserAvatar src={dialogue.userAvatarUrl} alt={dialogue.userName} />
+        <UserAvatar
+          avatarId={dialogue.userAvatarId}
+          alt={dialogue.userName}
+        />
         <div>
           <h2 className="text-base font-semibold text-gray-900 dark:text-white">
             {dialogue.userName}

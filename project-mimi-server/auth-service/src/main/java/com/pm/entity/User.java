@@ -31,8 +31,8 @@ public class User {
     @NotBlank(message = "Display name is required")
     private String displayName;
 
-    @Column(name = "avatar_url")
-    private String avatarUrl;
+    @Column(name = "avatar_id")
+    private String avatarId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)

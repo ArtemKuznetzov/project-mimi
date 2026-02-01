@@ -1,5 +1,5 @@
 import { baseApi } from '@/shared/api/baseApi'
-import type { LoginRequestDTO, LoginResponseDTO, TokenValidationResult, UserPublicDTO } from '@/shared/api/generated'
+import type { LoginRequestDTO, LoginResponseDTO, TokenValidationResultDTO, UserPublicDTO } from '@/shared/api/generated'
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -10,7 +10,7 @@ export const authApi = baseApi.injectEndpoints({
         body: credentials,
       }),
     }),
-    validateToken: builder.query<TokenValidationResult, void>({
+    validateToken: builder.query<TokenValidationResultDTO, void>({
       query: () => ({
         url: '/auth/validate',
         method: 'GET',

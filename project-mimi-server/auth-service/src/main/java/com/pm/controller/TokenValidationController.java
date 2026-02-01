@@ -1,6 +1,6 @@
 package com.pm.controller;
 
-import com.pm.dto.TokenValidationResult;
+import com.pm.dto.TokenValidationResultDTO;
 import com.pm.common.web.exception.UnauthorizedException;
 import com.pm.service.TokenValidationService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ public class TokenValidationController {
     private final TokenValidationService validationService;
 
     @GetMapping
-    public ResponseEntity<TokenValidationResult> validate(
+    public ResponseEntity<TokenValidationResultDTO> validate(
             @RequestHeader(HttpHeaders.AUTHORIZATION) String authHeader
     ) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
