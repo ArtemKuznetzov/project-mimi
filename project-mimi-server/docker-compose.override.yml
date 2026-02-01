@@ -6,3 +6,7 @@ services:
   chat-service-db:
     ports:
       - "127.0.0.1:5002:5432"
+
+  minio:
+    volumes:
+      - ./minio-data:/data

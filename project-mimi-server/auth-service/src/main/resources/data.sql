@@ -14,7 +14,7 @@ SELECT
     '$2a$12$nH6eFuo3CfqWPUZ7iq4eZOjwAW00JC8F5GwJjGet/MBAZ8IufgvDO',
     'USER',
     'ArT:eM',
-    '25d4daa7-9db1-4ef8-a0d6-dc8da85ab261'
+    'f4954ef8-d5a1-4ced-90c1-5cf29ee2eb90'
     WHERE NOT EXISTS (
     SELECT 1 FROM "users" WHERE id = 1 OR email = 'testuser@test.com'
 );
@@ -26,7 +26,7 @@ SELECT
     '$2a$12$hFmZILPiPzGNjZWjLKklE.g/Dd9CcjHwTzTAK.WvjIoCCWFSLZcpq',
     'USER',
     'Beyza',
-    '074800de-df2c-4680-bcae-d04e95baa40f'
+    '86c05794-ed13-4632-809d-264e0008b8e8'
     WHERE NOT EXISTS (
     SELECT 1 FROM "users" WHERE id = 2 OR email = 'beyza@test.com'
 );
