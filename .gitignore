@@ -125,3 +125,7 @@ application-local.yml
 # Local configuration
 local.properties
 local.yml
+
+# MinIO data (dev storage)
+project-mimi-server/minio-data/
+**/minio-data/
