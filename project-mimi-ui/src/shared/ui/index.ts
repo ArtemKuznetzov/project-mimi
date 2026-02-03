@@ -14,4 +14,5 @@ export {
 } from './Card/Card'
 export { Toast } from './Toast'
 export { UserAvatar } from './UserAvatar/UserAvatar'
+export { Skeleton } from './Skeleton/Skeleton'
 

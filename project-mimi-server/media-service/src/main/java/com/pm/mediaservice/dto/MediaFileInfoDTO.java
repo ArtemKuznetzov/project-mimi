@@ -1,13 +1,13 @@
 package com.pm.mediaservice.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PositiveOrZero;
 
-@Schema(requiredProperties = {"objectName", "contentType", "size"})
 public record MediaFileInfoDTO(
-        String objectName,
+        @NotBlank String objectName,
         String originalName,
         String extension,
-        String contentType,
-        long size
+        @NotBlank String contentType,
+        @PositiveOrZero long size
 ) {
 }

@@ -1,15 +1,15 @@
 import { useMemo, useState } from 'react'
-import { DialoguesHeader } from '@/features/dialogues/ui/DialoguesHeader.tsx'
-import { DialoguesList } from '@/features/dialogues/ui/DialoguesList.tsx'
-import { useGetDialogsQuery } from "@/features/dialogues/api/dialogsApi.ts";
+import { DialogsHeader } from '@/features/dialogs/ui/DialogsHeader'
+import { DialogsList } from '@/features/dialogs/ui/DialogsList'
+import { useGetDialogsQuery } from "@/features/dialogs/api/dialogsApi";
 
-export const DialoguesPage = () => {
+export const DialogsPage = () => {
   const [isSearchMode, setIsSearchMode] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
   const { data: dialogsData = [] } = useGetDialogsQuery()
 
-  const filteredDialogues = useMemo(() => {
+  const filteredDialogs = useMemo(() => {
     if (!searchQuery.trim()) {
       return dialogsData
     }
@@ -30,14 +30,14 @@ export const DialoguesPage = () => {
 
   return (
     <div className="space-y-6">
-      <DialoguesHeader
+      <DialogsHeader
         isSearchMode={isSearchMode}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onSearchToggle={handleSearchToggle}
         onSearchClear={handleSearchClear}
       />
-      <DialoguesList dialogues={filteredDialogues} />
+      <DialogsList dialogs={filteredDialogs} />
     </div>
   )
 }

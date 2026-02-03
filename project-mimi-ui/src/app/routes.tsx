@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import type { ReactNode } from 'react'
-import { LoginPage, FeedPage, DialoguesPage, ProfilePage } from '@/pages'
+import { LoginPage, FeedPage, DialogsPage, ProfilePage } from '@/pages'
 import { AppLayout } from './layouts/AppLayout'
 import { useAppSelector } from './hooks'
 import { MessagesPage } from "@/pages/MessagesPage";
@@ -36,9 +36,9 @@ export const AppRoutes = () => {
       >
         <Route index element={<Navigate to="feed" replace />} />
         <Route path="feed" element={<FeedPage />} />
-        <Route path="messages" element={<DialoguesPage />} />
+        <Route path="messages" element={<DialogsPage />} />
         <Route path="profile" element={<ProfilePage />} />
-        <Route path="messages/:dialogueId" element={<MessagesPage />} />
+        <Route path="messages/:dialogId" element={<MessagesPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/feed" replace />} />
     </Routes>

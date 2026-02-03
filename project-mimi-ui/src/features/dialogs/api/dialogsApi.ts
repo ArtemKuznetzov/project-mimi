@@ -1,4 +1,4 @@
-import { baseApi } from "@/shared/api/baseApi.ts";
+import { baseApi } from "@/shared/api/baseApi";
 import type { DialogResponseDTO } from "@/shared/api/generated";
 
 export const dialogsApi = baseApi.injectEndpoints({
@@ -8,10 +8,17 @@ export const dialogsApi = baseApi.injectEndpoints({
         url: "/chat/dialogs",
         method: "GET"
       })
+    }),
+    getDialogById: builder.query<DialogResponseDTO, number>({
+      query: (id) => ({
+        url: `/chat/dialogs/${id}`,
+        method: "GET"
+      })
     })
   })
 })
 
 export const {
-  useGetDialogsQuery
+  useGetDialogsQuery,
+  useGetDialogByIdQuery
 } = dialogsApi

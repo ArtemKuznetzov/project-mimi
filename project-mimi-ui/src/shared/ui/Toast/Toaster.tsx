@@ -1,6 +1,6 @@
 
 import { Toast } from './Toast'
-import {useToastContext} from "@/app/providers/toast/ToastContext.ts";
+import { useToastContext } from "@/app/providers/toast/ToastContext";
 
 export const Toaster = () => {
   const { toasts, removeToast } = useToastContext()

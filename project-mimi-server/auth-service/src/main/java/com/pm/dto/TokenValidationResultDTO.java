@@ -1,10 +1,10 @@
 package com.pm.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
-@Schema(requiredProperties = {"userId", "email", "role"})
 public record TokenValidationResultDTO(
-        Long userId,
-        String email,
-        String role
+        @NotNull Long userId,
+        @NotBlank String email,
+        @NotBlank String role
 ) {}

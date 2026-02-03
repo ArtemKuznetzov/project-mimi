@@ -27,4 +27,25 @@ public interface DialogRepository extends JpaRepository<Dialog, Long> {
            "WHERE EXISTS (SELECT 1 FROM DialogParticipant p1 " +
            "              WHERE p1.id.dialogId = d.id AND p1.id.userId = :currentUserId)")
     List<DialogDataDTO> findDialogDataByUserId(@Param("currentUserId") Long currentUserId);
+
+    @Query("SELECT new com.pm.chatservice.dto.DialogDataDTO(" +
+           "d.id, " +
+           "(SELECT COUNT(p_count.id.userId) FROM DialogParticipant p_count " +
+           " WHERE p_count.id.dialogId = d.id), " +
+           "(SELECT MIN(p2.id.userId) FROM DialogParticipant p2 " +
+           " WHERE p2.id.dialogId = d.id AND p2.id.userId != :currentUserId), " +
+           "d.title, " +
+           "d.avatarUrl, " +
+           "d.lastMessageId, " +
+           "m.body, " +
+           "m.createdAt) " +
+           "FROM Dialog d " +
+           "LEFT JOIN Message m ON m.id = d.lastMessageId " +
+           "WHERE d.id = :dialogId " +
+           "AND EXISTS (SELECT 1 FROM DialogParticipant p1 " +
+           "            WHERE p1.id.dialogId = d.id AND p1.id.userId = :currentUserId)")
+    java.util.Optional<DialogDataDTO> findDialogDataByUserIdAndDialogId(
+            @Param("currentUserId") Long currentUserId,
+            @Param("dialogId") Long dialogId
+    );
 }

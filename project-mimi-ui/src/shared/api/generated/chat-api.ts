@@ -4,6 +4,22 @@
  */
 
 export interface paths {
+    "/messages/{dialogId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getMessages"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/dialogs": {
         parameters: {
             query?: never;
@@ -20,10 +36,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/dialogs/{dialogId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getDialogById"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        MessageResponseDTO: {
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            dialogId: number;
+            body: string;
+            isEdited: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            userName: string;
+            /** Format: int64 */
+            userId: number;
+            userAvatarId?: string;
+        };
         DialogResponseDTO: {
             /** Format: int64 */
             id: number;
@@ -44,6 +90,28 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    getMessages: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dialogId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MessageResponseDTO"][];
+                };
+            };
+        };
+    };
     getDialogs: {
         parameters: {
             query?: never;
@@ -60,6 +128,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["DialogResponseDTO"][];
+                };
+            };
+        };
+    };
+    getDialogById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dialogId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DialogResponseDTO"];
                 };
             };
         };

@@ -4,6 +4,7 @@ import com.pm.chatservice.dto.DialogResponseDTO;
 import com.pm.chatservice.service.DialogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,6 +18,11 @@ public class DialogController {
 
     @GetMapping
     public List<DialogResponseDTO> getDialogs() {
-        return dialogService.getDialogsByUserId();
+        return dialogService.getDialogs();
+    }
+
+    @GetMapping("/{dialogId}")
+    public DialogResponseDTO getDialogById(@PathVariable Long dialogId) {
+        return dialogService.getDialogById(dialogId);
     }
 }

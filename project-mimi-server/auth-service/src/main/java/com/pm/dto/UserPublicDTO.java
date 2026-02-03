@@ -1,11 +1,11 @@
 package com.pm.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
-@Schema(requiredProperties = {"id", "displayName"})
 public record UserPublicDTO(
-        Long id,
-        String displayName,
+        @NotNull Long id,
+        @NotBlank String displayName,
         String avatarId
 ) {
 }

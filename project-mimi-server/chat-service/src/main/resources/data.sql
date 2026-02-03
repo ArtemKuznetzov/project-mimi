@@ -3,15 +3,15 @@ CREATE TABLE IF NOT EXISTS dialogs (
     last_message_id BIGINT,
     title VARCHAR(255),
     avatar_url TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS dialog_participants (
     dialog_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
     role VARCHAR(20) NOT NULL DEFAULT 'MEMBER',
-    joined_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    joined_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY (dialog_id, user_id),
     FOREIGN KEY (dialog_id) REFERENCES dialogs(id) ON DELETE CASCADE
 );
@@ -21,8 +21,8 @@ CREATE TABLE IF NOT EXISTS messages (
     dialog_id BIGINT NOT NULL,
     author_id BIGINT NOT NULL,
     body TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ,
     is_edited BOOLEAN NOT NULL DEFAULT FALSE,
     is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (dialog_id) REFERENCES dialogs(id) ON DELETE CASCADE
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS dialog_user_state (
     dialog_id BIGINT NOT NULL,
     user_id BIGINT NOT NULL,
     last_read_message_id BIGINT,
-    last_read_at TIMESTAMP,
+    last_read_at TIMESTAMPTZ,
     PRIMARY KEY (dialog_id, user_id),
     FOREIGN KEY (dialog_id) REFERENCES dialogs(id) ON DELETE CASCADE,
     FOREIGN KEY (last_read_message_id) REFERENCES messages(id)
@@ -58,14 +58,14 @@ SELECT 1, 2
     WHERE dialog_id = 1 AND user_id = 2
 );
 
-INSERT INTO messages (id, dialog_id, author_id, body)
-SELECT 1, 1, 1, 'Günaydın!'
+INSERT INTO messages (id, dialog_id, author_id, body, created_at)
+SELECT 1, 1, 1, 'Günaydın!', NOW()
     WHERE NOT EXISTS (
     SELECT 1 FROM messages WHERE id = 1
 );
 
-INSERT INTO messages (id, dialog_id, author_id, body)
-SELECT 2, 1, 2, 'Günaydın :7'
+INSERT INTO messages (id, dialog_id, author_id, body, created_at)
+SELECT 2, 1, 2, 'Günaydın :7', NOW()
     WHERE NOT EXISTS (
     SELECT 1 FROM messages WHERE id = 2
 );

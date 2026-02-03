@@ -1,6 +1,6 @@
 import { Search, X } from 'lucide-react'
-import { Input } from '@/shared/ui/Input/Input.tsx'
-import { Button } from '@/shared/ui/Button/Button.tsx'
+import { Input } from '@/shared/ui/Input/Input'
+import { Button } from '@/shared/ui/Button/Button'
 
 type MessagesHeaderProps = {
   isSearchMode: boolean
@@ -10,7 +10,7 @@ type MessagesHeaderProps = {
   onSearchClear: () => void
 }
 
-export const DialoguesHeader = ({
+export const DialogsHeader = ({
   isSearchMode,
   searchQuery,
   onSearchChange,

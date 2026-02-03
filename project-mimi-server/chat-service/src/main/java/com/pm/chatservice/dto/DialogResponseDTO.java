@@ -1,14 +1,14 @@
 package com.pm.chatservice.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import java.time.LocalDateTime;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import java.time.Instant;
 
-@Schema(requiredProperties = {"id", "userId", "userName"})
 public record DialogResponseDTO(
-    Long id,
-    Long userId,
-    String userName,
+    @NotNull Long id,
+    @NotNull Long userId,
+    @NotBlank String userName,
     String userAvatarId,
     String lastMessageBody,
-    LocalDateTime lastMessageDate
+    Instant lastMessageDate
 ) {}
