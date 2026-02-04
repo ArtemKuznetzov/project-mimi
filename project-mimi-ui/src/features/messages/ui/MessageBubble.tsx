@@ -20,7 +20,7 @@ export const MessageBubble = ({
 }: MessageBubbleProps) => (
   <div
     className={cn(
-      "relative rounded-2xl px-3 pb-5 pt-2 text-sm shadow-sm",
+      "relative min-w-0 max-w-full rounded-2xl px-3 pb-5 pt-2 text-sm shadow-sm",
       isMine
         ? "bg-blue-500 text-white rounded-br-sm"
         : "bg-gray-100 text-gray-900 rounded-bl-sm dark:bg-gray-800 dark:text-gray-100",
@@ -32,7 +32,7 @@ export const MessageBubble = ({
         {userName}
       </div>
     ) : null}
-    <p className="whitespace-pre-wrap break-words">{body}</p>
+    <p className="whitespace-pre-wrap break-words break-all">{body}</p>
     <span
       className={cn(
         "absolute bottom-1 right-2 text-[10px]",

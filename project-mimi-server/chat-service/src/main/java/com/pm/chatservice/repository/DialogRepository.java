@@ -19,11 +19,14 @@ public interface DialogRepository extends JpaRepository<Dialog, Long> {
            " WHERE p2.id.dialogId = d.id AND p2.id.userId != :currentUserId), " +
            "d.title, " +
            "d.avatarUrl, " +
-           "d.lastMessageId, " +
+           "m.id, " +
            "m.body, " +
-           "m.createdAt) " +
+           "m.createdAt, " +
+           "m.authorId) " +
            "FROM Dialog d " +
-           "LEFT JOIN Message m ON m.id = d.lastMessageId " +
+           "LEFT JOIN Message m ON m.id = (" +
+           "    SELECT MAX(m2.id) FROM Message m2 WHERE m2.dialog.id = d.id" +
+           ") " +
            "WHERE EXISTS (SELECT 1 FROM DialogParticipant p1 " +
            "              WHERE p1.id.dialogId = d.id AND p1.id.userId = :currentUserId)")
     List<DialogDataDTO> findDialogDataByUserId(@Param("currentUserId") Long currentUserId);
@@ -36,11 +39,14 @@ public interface DialogRepository extends JpaRepository<Dialog, Long> {
            " WHERE p2.id.dialogId = d.id AND p2.id.userId != :currentUserId), " +
            "d.title, " +
            "d.avatarUrl, " +
-           "d.lastMessageId, " +
+           "m.id, " +
            "m.body, " +
-           "m.createdAt) " +
+           "m.createdAt, " +
+           "m.authorId) " +
            "FROM Dialog d " +
-           "LEFT JOIN Message m ON m.id = d.lastMessageId " +
+           "LEFT JOIN Message m ON m.id = (" +
+           "    SELECT MAX(m2.id) FROM Message m2 WHERE m2.dialog.id = d.id" +
+           ") " +
            "WHERE d.id = :dialogId " +
            "AND EXISTS (SELECT 1 FROM DialogParticipant p1 " +
            "            WHERE p1.id.dialogId = d.id AND p1.id.userId = :currentUserId)")

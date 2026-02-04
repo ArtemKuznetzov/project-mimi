@@ -7,7 +7,9 @@ export const DialogsPage = () => {
   const [isSearchMode, setIsSearchMode] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
-  const { data: dialogsData = [] } = useGetDialogsQuery()
+  const { data: dialogsData = [] } = useGetDialogsQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  })
 
   const filteredDialogs = useMemo(() => {
     if (!searchQuery.trim()) {

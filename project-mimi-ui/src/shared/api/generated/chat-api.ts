@@ -80,6 +80,8 @@ export interface components {
             lastMessageBody?: string;
             /** Format: date-time */
             lastMessageDate?: string;
+            /** Format: int64 */
+            lastMessageUserId?: number;
         };
     };
     responses: never;

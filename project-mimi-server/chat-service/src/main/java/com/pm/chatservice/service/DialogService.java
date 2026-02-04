@@ -68,7 +68,8 @@ public class DialogService {
                 userName,
                 userAvatarId,
                 dialogData.lastMessageBody(),
-                dialogData.lastMessageDate()
+                dialogData.lastMessageDate(),
+                dialogData.lastMessageUserId()
         );
     }
 }

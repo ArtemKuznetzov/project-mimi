@@ -10,5 +10,6 @@ public record DialogResponseDTO(
     @NotBlank String userName,
     String userAvatarId,
     String lastMessageBody,
-    Instant lastMessageDate
+    Instant lastMessageDate,
+    Long lastMessageUserId
 ) {}

@@ -59,7 +59,7 @@ export const MessagesPage = () => {
   return (
     <div className="space-y-6">
       <MessageHeader dialog={dialog} />
-      <MessageList messages={messages} />
+      <MessageList messages={messages} dialogId={dialogIdInt} />
       <MessageInput onSend={sendMessage} isConnected={isConnected} />
     </div>
   )

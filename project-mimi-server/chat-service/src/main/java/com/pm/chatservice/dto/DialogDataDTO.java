@@ -8,7 +8,8 @@ public record DialogDataDTO(
     String dialogAvatarUrl,  // nullable, only for groups
     Long lastMessageId,
     String lastMessageBody,
-    java.time.Instant lastMessageDate
+    java.time.Instant lastMessageDate,
+    Long lastMessageUserId
 ) {
     public Long getParticipantsCountAsLong() {
         return participantsCount != null ? participantsCount.longValue() : 0L;
