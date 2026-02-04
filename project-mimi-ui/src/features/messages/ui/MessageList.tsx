@@ -1,4 +1,3 @@
-import { useGetMessagesQuery } from "@/features/messages/api/messagesApi";
 import { useAppSelector } from "@/app/hooks";
 import { UserAvatar } from "@/shared/ui";
 import { cn } from "@/lib/utils";
@@ -6,14 +5,13 @@ import { MessageBubble } from "@/features/messages/ui/MessageBubble";
 import type { MessageResponseDTO } from "@/shared/api/generated";
 
 type MessageListProps = {
-  dialogId: number
+  messages: MessageResponseDTO[]
 }
 
-export const MessageList = ({dialogId}: MessageListProps) => {
-  const { data: data = [] } = useGetMessagesQuery(dialogId)
+export const MessageList = ({ messages }: MessageListProps) => {
   const currentUserId = useAppSelector((state) => state.auth.userId)
 
-  if (data.length === 0) {
+  if (messages.length === 0) {
     return (
       <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
         No messages yet.
@@ -23,7 +21,7 @@ export const MessageList = ({dialogId}: MessageListProps) => {
 
   return (
     <ul className="space-y-4 rounded-lg border bg-white p-4 shadow-sm dark:bg-gray-900">
-      {data.map((message: MessageResponseDTO) => {
+      {messages.map((message: MessageResponseDTO) => {
         const isMine = currentUserId !== null && message.userId === currentUserId
         return (
           <li

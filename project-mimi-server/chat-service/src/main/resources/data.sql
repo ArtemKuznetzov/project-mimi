@@ -75,6 +75,13 @@ SET last_message_id = 2,
     updated_at = NOW()
 WHERE id = 1;
 
+SELECT setval(pg_get_serial_sequence('dialogs', 'id'),
+              (SELECT COALESCE(MAX(id), 1) FROM dialogs),
+              true);
+SELECT setval(pg_get_serial_sequence('messages', 'id'),
+              (SELECT COALESCE(MAX(id), 1) FROM messages),
+              true);
+
 -- ArT:eM read everything
 INSERT INTO dialog_user_state (dialog_id, user_id, last_read_message_id, last_read_at)
 SELECT 1, 1, 2, NOW()
