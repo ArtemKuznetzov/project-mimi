@@ -13,8 +13,15 @@ const getWebSocketBaseUrl = (baseUrl: string) => {
 
 export const chatWebSocketUrl = `${getWebSocketBaseUrl(apiBaseUrl)}/chat/ws`;
 
-export const createStompClient = () =>
-  new Client({
-    brokerURL: chatWebSocketUrl,
+export const createStompClient = (accessToken: string) => {
+  const encodedToken = encodeURIComponent(accessToken);
+  const brokerURL = `${chatWebSocketUrl}?token=${encodedToken}`;
+
+  return new Client({
+    brokerURL,
     reconnectDelay: 5000,
+    connectHeaders: {
+      Authorization: `Bearer ${accessToken}`,
+    },
   });
+};

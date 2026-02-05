@@ -1,8 +1,7 @@
 package com.pm.chatservice.dto;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 public record MessageCreateDTO(
-        @NotNull Long userId,
-        @NotNull String body
+        @NotBlank String body
 ) {}

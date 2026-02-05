@@ -21,6 +21,16 @@ spring:
           filters:
             - StripPrefix=1
 
+        ## WS CLIENT -> ws://localhost:4004/chat/ws
+        ## API GATEWAY -> ws://chat-service:4000/ws
+        - id: chat-service-ws-route
+          uri: ${CHAT_SERVICE_WS_URI:ws://localhost:4000}
+          predicates:
+            - Path=/chat/ws/**
+          filters:
+            - StripPrefix=1
+            - JwtValidation
+
         ## REST CLIENT -> http://localhost:4004/chat
         ## API GATEWAY -> http://chat-service:4000/chat
         ## PARENT SERVICE (SPRING BOOT APP) -> /chat -> Chat Array

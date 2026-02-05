@@ -16,10 +16,10 @@ export const MessageInput = ({ onSend, isConnected }: MessageInputProps) => {
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!canSend || !userId) {
+    if (!canSend) {
       return;
     }
-    const sent = onSend({ userId, body: trimmedValue });
+    const sent = onSend({ body: trimmedValue });
     if (sent) {
       setValue("");
     }

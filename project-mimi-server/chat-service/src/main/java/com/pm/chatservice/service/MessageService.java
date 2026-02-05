@@ -45,15 +45,16 @@ public class MessageService {
     }
 
     @Transactional
-    public MessageResponseDTO saveMessage(Long dialogId, MessageCreateDTO dto) {
+    public MessageResponseDTO saveMessage(Long dialogId, Long userId, MessageCreateDTO dto) {
         Objects.requireNonNull(dialogId, "dialogId must not be null");
+        Objects.requireNonNull(userId, "userId must not be null");
         Objects.requireNonNull(dto, "message payload must not be null");
 
-        UserPublicDTO user = authUserClient.getUser(dto.userId());
+        UserPublicDTO user = authUserClient.getUser(userId);
 
         Message message = new Message();
         message.setBody(dto.body());
-        message.setAuthorId(dto.userId());
+        message.setAuthorId(userId);
         message.setCreatedAt(Instant.now());
 
         Dialog dialog = dialogRepository.getReferenceById(dialogId);

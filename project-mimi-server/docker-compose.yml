@@ -92,6 +92,7 @@ services:
       AUTH_SERVICE_URL: http://auth-service:4005
       AUTH_SERVICE_URI: http://auth-service:4005
       CHAT_SERVICE_URI: http://chat-service:4000
+      CHAT_SERVICE_WS_URI: ws://chat-service:4000
       MEDIA_SERVICE_URI: http://media-service:4006
     ports:
       - "4004:4004"

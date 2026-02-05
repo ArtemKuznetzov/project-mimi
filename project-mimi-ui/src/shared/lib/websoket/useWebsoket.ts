@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 import type { Client, IMessage, StompSubscription } from "@stomp/stompjs";
 import type { MessageResponseDTO } from "@/shared/api/generated";
 import { createStompClient } from "@/shared/lib/websoket/client";
 import type { MessageCreatePayload } from "@/shared/lib/websoket/types";
+import type { RootState } from "@/app/store";
 
 type UseWebsoketOptions = {
   dialogId: number;
@@ -14,6 +16,7 @@ export const useWebsoket = ({ dialogId, onMessage }: UseWebsoketOptions) => {
   const clientRef = useRef<Client | null>(null);
   const subscriptionRef = useRef<StompSubscription | null>(null);
   const onMessageRef = useRef(onMessage);
+  const accessToken = useSelector((state: RootState) => state.auth.accessToken);
 
   useEffect(() => {
     onMessageRef.current = onMessage;
@@ -24,7 +27,12 @@ export const useWebsoket = ({ dialogId, onMessage }: UseWebsoketOptions) => {
       return;
     }
 
-    const client = createStompClient();
+    if (!accessToken) {
+      console.warn("Cannot connect to WebSocket without access token");
+      return;
+    }
+
+    const client = createStompClient(accessToken);
     clientRef.current = client;
 
     client.onConnect = () => {
@@ -50,7 +58,8 @@ export const useWebsoket = ({ dialogId, onMessage }: UseWebsoketOptions) => {
       setIsConnected(false);
     };
 
-    client.onStompError = () => {
+    client.onStompError = (frame) => {
+      console.error("WebSocket STOMP error:", frame);
       setIsConnected(false);
     };
 
@@ -58,7 +67,8 @@ export const useWebsoket = ({ dialogId, onMessage }: UseWebsoketOptions) => {
       setIsConnected(false);
     };
 
-    client.onWebSocketError = () => {
+    client.onWebSocketError = (event) => {
+      console.error("WebSocket error:", event);
       setIsConnected(false);
     };
 
@@ -71,7 +81,7 @@ export const useWebsoket = ({ dialogId, onMessage }: UseWebsoketOptions) => {
       clientRef.current = null;
       setIsConnected(false);
     };
-  }, [dialogId]);
+  }, [dialogId, accessToken]);
 
   const sendMessage = useCallback(
     (payload: MessageCreatePayload) => {

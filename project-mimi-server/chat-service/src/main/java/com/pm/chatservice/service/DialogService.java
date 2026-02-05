@@ -42,6 +42,11 @@ public class DialogService {
         return toDialogResponse(dialogData);
     }
 
+    @Transactional(readOnly = true)
+    public boolean isUserParticipant(Long dialogId, Long userId) {
+        return dialogRepository.findDialogDataByUserIdAndDialogId(userId, dialogId).isPresent();
+    }
+
     private DialogResponseDTO toDialogResponse(DialogDataDTO dialogData) {
         String userName;
         String userAvatarId;

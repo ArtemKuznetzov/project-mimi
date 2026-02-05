@@ -8,6 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ServerWebExchange;
 
 @Component
 public class JwtValidationGatewayFilterFactory extends AbstractGatewayFilterFactory<Object> {
@@ -19,16 +20,16 @@ public class JwtValidationGatewayFilterFactory extends AbstractGatewayFilterFact
     @Override
     public GatewayFilter apply(Object config) {
         return (exchange, chain) -> {
-            String token = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-
-            if (token == null || !token.startsWith("Bearer ")) {
+            String tokenValue = resolveToken(exchange);
+            if (tokenValue == null) {
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                 return exchange.getResponse().setComplete();
             }
 
+            String authHeader = "Bearer " + tokenValue;
             return webClient.get()
                     .uri("/validate")
-                    .header(HttpHeaders.AUTHORIZATION, token)
+                    .header(HttpHeaders.AUTHORIZATION, authHeader)
                     .retrieve()
                     .bodyToMono(TokenValidationResultDTO.class)
                     .flatMap(result -> {
@@ -49,5 +50,25 @@ public class JwtValidationGatewayFilterFactory extends AbstractGatewayFilterFact
                         return exchange.getResponse().setComplete();
                     });
         };
+    }
+
+    private String resolveToken(ServerWebExchange exchange) {
+        String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+
+        // For websocket
+        // TODO refactor JWT for websokets - create short-lived tokens
+        String tokenParam = exchange.getRequest().getQueryParams().getFirst("token");
+        if (tokenParam == null || tokenParam.isBlank()) {
+            return null;
+        }
+
+        if (tokenParam.startsWith("Bearer ")) {
+            return tokenParam.substring(7);
+        }
+
+        return tokenParam;
     }
 }
