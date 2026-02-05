@@ -1,12 +1,13 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGetDialogByIdQuery } from "@/features/dialogs/api/dialogsApi";
 import { useGetMessagesQuery } from "@/features/messages/api/messagesApi";
-import { MessageList } from "@/features/messages/ui/MessageList";
+import { MessageList, type MessageListHandle } from "@/features/messages/ui/MessageList";
 import { MessageInput } from "@/features/messages/ui/MessageInput";
 import { MessageHeader } from "@/features/messages/ui/MessageHeader";
 import type { MessageResponseDTO } from "@/shared/api/generated";
 import { useWebsoket } from "@/shared/lib/websoket/useWebsoket";
+import { useAppSelector } from "@/app/hooks";
 
 export const MessagesPage = () => {
   const { dialogId } = useParams();
@@ -14,7 +15,9 @@ export const MessagesPage = () => {
 
   const { data: dialog } = useGetDialogByIdQuery(dialogIdInt);
   const { data: messagesData = [] } = useGetMessagesQuery(dialogIdInt);
+  const currentUserId = useAppSelector((state) => state.auth.userId);
   const [liveMessagesByDialog, setLiveMessagesByDialog] = useState<Record<number, MessageResponseDTO[]>>({});
+  const listHandleRef = useRef<MessageListHandle | null>(null);
 
   const handleMessage = useCallback(
     (message: MessageResponseDTO) => {
@@ -30,8 +33,12 @@ export const MessagesPage = () => {
           [dialogIdInt]: [...current, message],
         };
       });
+
+      if (currentUserId !== null && message.userId === currentUserId) {
+        requestAnimationFrame(() => listHandleRef.current?.scrollToBottom("smooth"));
+      }
     },
-    [dialogIdInt, messagesData],
+    [dialogIdInt, messagesData, currentUserId],
   );
 
   const { sendMessage, isConnected } = useWebsoket({
@@ -57,7 +64,7 @@ export const MessagesPage = () => {
   return (
     <div className="space-y-6">
       <MessageHeader dialog={dialog} />
-      <MessageList messages={messages} dialogId={dialogIdInt} />
+      <MessageList messages={messages} dialogId={dialogIdInt} ref={listHandleRef} />
       <MessageInput onSend={sendMessage} isConnected={isConnected} />
     </div>
   );

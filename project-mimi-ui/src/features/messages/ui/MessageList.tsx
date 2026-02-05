@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef } from "react";
+import {forwardRef, useImperativeHandle, useLayoutEffect, useRef} from "react";
 import { useAppSelector } from "@/app/hooks";
 import { UserAvatar } from "@/shared/ui";
 import { cn } from "@/lib/utils";
@@ -7,16 +7,42 @@ import type { MessageResponseDTO } from "@/shared/api/generated";
 
 const dialogScrollPositions = new Map<number, number>();
 
+export type MessageListHandle = {
+  scrollToBottom: (behavior: ScrollBehavior) => void;
+  isNearBottom: (threshold: number) => boolean;
+}
+
 type MessageListProps = {
   messages: MessageResponseDTO[];
   dialogId: number;
 };
 
-export const MessageList = ({ messages, dialogId }: MessageListProps) => {
+export const MessageList = forwardRef<MessageListHandle, MessageListProps>(({ messages, dialogId }: MessageListProps, ref) => {
   const currentUserId = useAppSelector((state) => state.auth.userId);
   const listRef = useRef<HTMLUListElement | null>(null);
   const lastDialogIdRef = useRef<number | null>(null);
   const shouldRestoreRef = useRef(false);
+
+  const scrollToBottom = (behavior: ScrollBehavior = "auto") => {
+    const list = listRef.current;
+    if (!list) {
+      return;
+    }
+    list.scrollTo({behavior, top: list.scrollHeight });
+  };
+
+  const isNearBottom = (threshold: number = 40) => {
+    const list = listRef.current;
+    if (!list) {
+      return false;
+    }
+    return list.scrollHeight - list.scrollTop - list.clientHeight < threshold
+  }
+
+  useImperativeHandle(ref, () => ({
+    scrollToBottom,
+    isNearBottom
+  }), [])
 
   useLayoutEffect(() => {
     if (!Number.isFinite(dialogId)) {
@@ -84,4 +110,4 @@ export const MessageList = ({ messages, dialogId }: MessageListProps) => {
       })}
     </ul>
   );
-};
+});
