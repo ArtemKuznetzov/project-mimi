@@ -5,63 +5,59 @@ import { cn } from "@/lib/utils";
 import { MessageBubble } from "@/features/messages/ui/MessageBubble";
 import type { MessageResponseDTO } from "@/shared/api/generated";
 
-const dialogScrollPositions = new Map<number, number>()
+const dialogScrollPositions = new Map<number, number>();
 
 type MessageListProps = {
-  messages: MessageResponseDTO[]
-  dialogId: number
-}
+  messages: MessageResponseDTO[];
+  dialogId: number;
+};
 
 export const MessageList = ({ messages, dialogId }: MessageListProps) => {
-  const currentUserId = useAppSelector((state) => state.auth.userId)
-  const listRef = useRef<HTMLUListElement | null>(null)
-  const lastDialogIdRef = useRef<number | null>(null)
-  const shouldRestoreRef = useRef(false)
+  const currentUserId = useAppSelector((state) => state.auth.userId);
+  const listRef = useRef<HTMLUListElement | null>(null);
+  const lastDialogIdRef = useRef<number | null>(null);
+  const shouldRestoreRef = useRef(false);
 
   useLayoutEffect(() => {
     if (!Number.isFinite(dialogId)) {
-      return
+      return;
     }
     if (lastDialogIdRef.current !== dialogId) {
-      lastDialogIdRef.current = dialogId
-      shouldRestoreRef.current = true
+      lastDialogIdRef.current = dialogId;
+      shouldRestoreRef.current = true;
     }
-  }, [dialogId])
+  }, [dialogId]);
 
   useLayoutEffect(() => {
     if (!shouldRestoreRef.current || !Number.isFinite(dialogId)) {
-      return
+      return;
     }
-    const list = listRef.current
+    const list = listRef.current;
     if (!list) {
-      return
+      return;
     }
-    const savedScrollTop = dialogScrollPositions.get(dialogId)
+    const savedScrollTop = dialogScrollPositions.get(dialogId);
     if (savedScrollTop !== undefined) {
-      list.scrollTop = savedScrollTop
+      list.scrollTop = savedScrollTop;
     } else {
-      list.scrollTop = list.scrollHeight
+      list.scrollTop = list.scrollHeight;
     }
-    shouldRestoreRef.current = false
-  }, [dialogId, messages.length])
+    shouldRestoreRef.current = false;
+  }, [dialogId, messages.length]);
 
   const handleScroll = () => {
     if (!Number.isFinite(dialogId)) {
-      return
+      return;
     }
-    const list = listRef.current
+    const list = listRef.current;
     if (!list) {
-      return
+      return;
     }
-    dialogScrollPositions.set(dialogId, list.scrollTop)
-  }
+    dialogScrollPositions.set(dialogId, list.scrollTop);
+  };
 
   if (messages.length === 0) {
-    return (
-      <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-        No messages yet.
-      </div>
-    )
+    return <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">No messages yet.</div>;
   }
 
   return (
@@ -71,25 +67,11 @@ export const MessageList = ({ messages, dialogId }: MessageListProps) => {
       className="scrollbar max-h-[60vh] overflow-y-auto space-y-4 rounded-lg border bg-white p-4 pr-2 shadow-sm dark:bg-gray-900"
     >
       {messages.map((message: MessageResponseDTO) => {
-        const isMine = currentUserId !== null && message.userId === currentUserId
+        const isMine = currentUserId !== null && message.userId === currentUserId;
         return (
-          <li
-            key={message.id}
-            className={cn("flex items-end gap-3", isMine ? "justify-end" : "justify-start")}
-          >
-            {!isMine && (
-              <UserAvatar
-                avatarId={message.userAvatarId}
-                alt={message.userName}
-                className="h-9 w-9"
-              />
-            )}
-            <div
-              className={cn(
-                "max-w-[70%] min-w-0 space-y-1 flex flex-col",
-                isMine ? "items-end" : "items-start"
-              )}
-            >
+          <li key={message.id} className={cn("flex items-end gap-3", isMine ? "justify-end" : "justify-start")}>
+            {!isMine && <UserAvatar avatarId={message.userAvatarId} alt={message.userName} className="h-9 w-9" />}
+            <div className={cn("max-w-[70%] min-w-0 space-y-1 flex flex-col", isMine ? "items-end" : "items-start")}>
               <MessageBubble
                 body={message.body}
                 createdAt={message.createdAt}
@@ -98,8 +80,8 @@ export const MessageList = ({ messages, dialogId }: MessageListProps) => {
               />
             </div>
           </li>
-        )
+        );
       })}
     </ul>
-  )
-}
+  );
+};

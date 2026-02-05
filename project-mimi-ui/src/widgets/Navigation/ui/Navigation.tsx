@@ -1,23 +1,23 @@
-import type { HTMLAttributes } from 'react'
-import { NavLink } from 'react-router-dom'
-import { NewspaperIcon, MessageCircle, User } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import type { HTMLAttributes } from "react";
+import { NavLink } from "react-router-dom";
+import { NewspaperIcon, MessageCircle, User } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-type NavigationProps = HTMLAttributes<HTMLElement>
+type NavigationProps = HTMLAttributes<HTMLElement>;
 
 const navItems = [
-  { to: '/profile', label: 'Profile', icon: User },
-  { to: '/messages', label: 'Messages', icon: MessageCircle },
-  { to: '/feed', label: 'Feed', icon: NewspaperIcon },
-]
+  { to: "/profile", label: "Profile", icon: User },
+  { to: "/messages", label: "Messages", icon: MessageCircle },
+  { to: "/feed", label: "Feed", icon: NewspaperIcon },
+];
 
 export const Navigation = ({ className, ...props }: NavigationProps) => {
   return (
     <>
       <nav
         className={cn(
-          'hidden w-full max-w-[260px] rounded-lg border bg-white p-2 shadow-sm transition-shadow duration-200 dark:border-gray-800 dark:bg-gray-900 md:sticky md:top-4 md:block md:self-start md:hover:shadow-md',
-          className
+          "hidden w-full max-w-[260px] rounded-lg border bg-white p-2 shadow-sm transition-shadow duration-200 dark:border-gray-800 dark:bg-gray-900 md:sticky md:top-4 md:block md:self-start md:hover:shadow-md",
+          className,
         )}
         aria-label="Main"
         {...props}
@@ -29,8 +29,8 @@ export const Navigation = ({ className, ...props }: NavigationProps) => {
                 to={item.to}
                 className={({ isActive }) =>
                   cn(
-                    'flex items-center gap-3 rounded-md px-3 py-2 text-muted-foreground transition-all hover:bg-background hover:text-foreground hover:shadow-sm',
-                    isActive && 'bg-background text-foreground shadow-sm font-medium'
+                    "flex items-center gap-3 rounded-md px-3 py-2 text-muted-foreground transition-all hover:bg-background hover:text-foreground hover:shadow-sm",
+                    isActive && "bg-background text-foreground shadow-sm font-medium",
                   )
                 }
               >
@@ -53,8 +53,8 @@ export const Navigation = ({ className, ...props }: NavigationProps) => {
                 to={item.to}
                 className={({ isActive }) =>
                   cn(
-                    'flex flex-col items-center gap-1 px-2 py-1 text-muted-foreground transition-colors',
-                    isActive && 'text-foreground'
+                    "flex flex-col items-center gap-1 px-2 py-1 text-muted-foreground transition-colors",
+                    isActive && "text-foreground",
                   )
                 }
                 aria-label={item.label}
@@ -66,5 +66,5 @@ export const Navigation = ({ className, ...props }: NavigationProps) => {
         </ul>
       </nav>
     </>
-  )
-}
+  );
+};

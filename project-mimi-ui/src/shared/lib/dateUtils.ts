@@ -8,7 +8,7 @@ type FormatMessageTimeOptions = {
 
 export const formatMessageTime = (
   value: string | Date,
-  { dateStyle, timeStyle = "short" }: FormatMessageTimeOptions = {}
+  { dateStyle, timeStyle = "short" }: FormatMessageTimeOptions = {},
 ) =>
   new Intl.DateTimeFormat(navigator.language, {
     dateStyle,
@@ -16,22 +16,21 @@ export const formatMessageTime = (
   }).format(new Date(value));
 
 export const getDateStr = (iso?: string) => {
-  if (!iso)
-    return ""
+  if (!iso) return "";
 
-  const serverDate = new Date(iso)
-  const clientDate = new Date()
-  const clientDateToday = new Date(clientDate.getFullYear(), clientDate.getMonth(), clientDate.getDate())
-  const clientDateYesterday = new Date(clientDateToday)
-  clientDateYesterday.setDate(clientDate.getDate() - 1)
+  const serverDate = new Date(iso);
+  const clientDate = new Date();
+  const clientDateToday = new Date(clientDate.getFullYear(), clientDate.getMonth(), clientDate.getDate());
+  const clientDateYesterday = new Date(clientDateToday);
+  clientDateYesterday.setDate(clientDate.getDate() - 1);
 
   if (serverDate >= clientDateToday) {
-    return "Today"
+    return "Today";
   }
 
   if (serverDate >= clientDateYesterday && serverDate < clientDateToday) {
     return "Yesterday";
   }
 
-  return formatMessageTime(serverDate, { dateStyle: "short", timeStyle: "short" })
-}
+  return formatMessageTime(serverDate, { dateStyle: "short", timeStyle: "short" });
+};

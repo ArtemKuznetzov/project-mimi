@@ -1,9 +1,8 @@
-
-import { Toast } from './Toast'
+import { Toast } from "./Toast";
 import { useToastContext } from "@/app/providers/toast/ToastContext";
 
 export const Toaster = () => {
-  const { toasts, removeToast } = useToastContext()
+  const { toasts, removeToast } = useToastContext();
 
   return (
     <div className="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
@@ -13,6 +12,5 @@ export const Toaster = () => {
         </div>
       ))}
     </div>
-  )
-}
-
+  );
+};

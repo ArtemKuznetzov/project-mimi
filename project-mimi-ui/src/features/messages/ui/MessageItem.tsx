@@ -1,5 +1,3 @@
 export const MessageItem = () => {
-  return (
-    <div>Message item</div>
-  )
-}
+  return <div>Message item</div>;
+};

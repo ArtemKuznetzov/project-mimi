@@ -38,20 +38,17 @@ export const useWebsoket = ({ dialogId, onMessage }: UseWebsoketOptions) => {
     client.onConnect = () => {
       setIsConnected(true);
       subscriptionRef.current?.unsubscribe();
-      subscriptionRef.current = client.subscribe(
-        `/topic/dialogs/${dialogId}`,
-        (frame: IMessage) => {
-          if (!frame.body) {
-            return;
-          }
-          try {
-            const payload = JSON.parse(frame.body) as MessageResponseDTO;
-            onMessageRef.current?.(payload);
-          } catch {
-            // ignore invalid payloads
-          }
+      subscriptionRef.current = client.subscribe(`/topic/dialogs/${dialogId}`, (frame: IMessage) => {
+        if (!frame.body) {
+          return;
         }
-      );
+        try {
+          const payload = JSON.parse(frame.body) as MessageResponseDTO;
+          onMessageRef.current?.(payload);
+        } catch {
+          // ignore invalid payloads
+        }
+      });
     };
 
     client.onDisconnect = () => {
@@ -95,7 +92,7 @@ export const useWebsoket = ({ dialogId, onMessage }: UseWebsoketOptions) => {
       });
       return true;
     },
-    [dialogId]
+    [dialogId],
   );
 
   return { sendMessage, isConnected };

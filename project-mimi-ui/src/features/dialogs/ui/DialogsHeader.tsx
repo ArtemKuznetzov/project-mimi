@@ -1,14 +1,14 @@
-import { Search, X } from 'lucide-react'
-import { Input } from '@/shared/ui/Input/Input'
-import { Button } from '@/shared/ui/Button/Button'
+import { Search, X } from "lucide-react";
+import { Input } from "@/shared/ui/Input/Input";
+import { Button } from "@/shared/ui/Button/Button";
 
 type MessagesHeaderProps = {
-  isSearchMode: boolean
-  searchQuery: string
-  onSearchChange: (value: string) => void
-  onSearchToggle: () => void
-  onSearchClear: () => void
-}
+  isSearchMode: boolean;
+  searchQuery: string;
+  onSearchChange: (value: string) => void;
+  onSearchToggle: () => void;
+  onSearchClear: () => void;
+};
 
 export const DialogsHeader = ({
   isSearchMode,
@@ -20,9 +20,7 @@ export const DialogsHeader = ({
   return (
     <div className="flex items-center justify-between gap-4">
       <div className="flex items-center gap-3">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-          {isSearchMode ? 'Search' : 'Messages'}
-        </h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{isSearchMode ? "Search" : "Messages"}</h2>
         {isSearchMode && (
           <div className="relative">
             <Input
@@ -46,17 +44,10 @@ export const DialogsHeader = ({
       </div>
 
       <div className="flex items-center gap-2">
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={onSearchToggle}
-          aria-label="Toggle search"
-        >
+        <Button type="button" variant="ghost" size="icon" onClick={onSearchToggle} aria-label="Toggle search">
           <Search className="h-4 w-4" />
         </Button>
       </div>
     </div>
-  )
-}
-
+  );
+};

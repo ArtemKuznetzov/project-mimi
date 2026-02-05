@@ -6,19 +6,16 @@ export const dialogsApi = baseApi.injectEndpoints({
     getDialogs: builder.query<DialogResponseDTO[], void>({
       query: () => ({
         url: "/chat/dialogs",
-        method: "GET"
-      })
+        method: "GET",
+      }),
     }),
     getDialogById: builder.query<DialogResponseDTO, number>({
       query: (id) => ({
         url: `/chat/dialogs/${id}`,
-        method: "GET"
-      })
-    })
-  })
-})
+        method: "GET",
+      }),
+    }),
+  }),
+});
 
-export const {
-  useGetDialogsQuery,
-  useGetDialogByIdQuery
-} = dialogsApi
+export const { useGetDialogsQuery, useGetDialogByIdQuery } = dialogsApi;

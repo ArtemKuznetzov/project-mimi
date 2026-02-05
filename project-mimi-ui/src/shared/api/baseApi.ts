@@ -1,70 +1,69 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query'
-import type { RootState } from '@/app/store'
-import { logout, setAccessToken } from '@/features/auth/model/authSlice'
-import type { LoginResponseDTO } from '@/shared/api/generated'
-import { apiBaseUrl } from '@/shared/config/api'
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import type { RootState } from "@/app/store";
+import { logout, setAccessToken } from "@/features/auth/model/authSlice";
+import type { LoginResponseDTO } from "@/shared/api/generated";
+import { apiBaseUrl } from "@/shared/config/api";
 
 const baseQuery = fetchBaseQuery({
   baseUrl: apiBaseUrl,
-  credentials: 'include',
+  credentials: "include",
   prepareHeaders: (headers, { getState }) => {
-    const accessToken = (getState() as RootState).auth.accessToken
+    const accessToken = (getState() as RootState).auth.accessToken;
     if (accessToken) {
-      headers.set('authorization', `Bearer ${accessToken}`)
+      headers.set("authorization", `Bearer ${accessToken}`);
     }
-    return headers
+    return headers;
   },
-})
+});
 
-const baseQueryWithReauth: BaseQueryFn<
-  string | FetchArgs,
-  unknown,
-  FetchBaseQueryError
-> = async (args, api, extraOptions) => {
-  let result = await baseQuery(args, api, extraOptions)
+const baseQueryWithReauth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
+  args,
+  api,
+  extraOptions,
+) => {
+  let result = await baseQuery(args, api, extraOptions);
 
-  if (result.error && 'status' in result.error && result.error.status === 401) {
+  if (result.error && "status" in result.error && result.error.status === 401) {
     try {
       const refreshResult = await fetchBaseQuery({
         baseUrl: apiBaseUrl,
-        credentials: 'include',
+        credentials: "include",
       })(
         {
-          url: '/auth/refresh',
-          method: 'POST',
+          url: "/auth/refresh",
+          method: "POST",
         },
         api,
-        extraOptions
-      )
-      
+        extraOptions,
+      );
+
       if (refreshResult.data) {
-        const { accessToken } = refreshResult.data as LoginResponseDTO
+        const { accessToken } = refreshResult.data as LoginResponseDTO;
 
-        if (accessToken && accessToken.trim() !== '') {
-          api.dispatch(setAccessToken(accessToken))
+        if (accessToken && accessToken.trim() !== "") {
+          api.dispatch(setAccessToken(accessToken));
 
-          result = await baseQuery(args, api, extraOptions)
+          result = await baseQuery(args, api, extraOptions);
         } else {
-          api.dispatch(logout())
+          api.dispatch(logout());
         }
       } else {
-        api.dispatch(logout())
+        api.dispatch(logout());
       }
     } catch {
-      api.dispatch(logout())
+      api.dispatch(logout());
     }
   }
 
-  if (result.error && 'status' in result.error && result.error.status === 403) {
-    api.dispatch(logout())
+  if (result.error && "status" in result.error && result.error.status === 403) {
+    api.dispatch(logout());
   }
-  
-  return result
-}
+
+  return result;
+};
 
 export const baseApi = createApi({
   baseQuery: baseQueryWithReauth,
   endpoints: () => ({}),
-})
-
+});

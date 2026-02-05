@@ -1,5 +1,3 @@
 export const MessageActions = () => {
-  return (
-    <div>Message actions</div>
-  )
-}
+  return <div>Message actions</div>;
+};

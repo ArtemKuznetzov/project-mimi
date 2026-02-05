@@ -60,6 +60,7 @@ Backend API is located at `http://localhost:4005`
 **POST** `/login`
 
 Request body:
+
 ```json
 {
   "email": "user@example.com",
@@ -68,6 +69,7 @@ Request body:
 ```
 
 Response:
+
 ```json
 {
   "accessToken": "jwt_token_here"

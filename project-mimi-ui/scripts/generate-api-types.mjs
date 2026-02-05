@@ -1,43 +1,43 @@
-import { readFileSync, mkdirSync } from 'fs';
-import { fileURLToPath } from 'url';
-import { dirname, join, resolve } from 'path';
-import { execSync } from 'child_process';
+import { readFileSync, mkdirSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join, resolve } from "path";
+import { execSync } from "child_process";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const projectRoot = resolve(__dirname, '..');
-const outputDir = resolve(projectRoot, 'src', 'shared', 'api', 'generated');
+const projectRoot = resolve(__dirname, "..");
+const outputDir = resolve(projectRoot, "src", "shared", "api", "generated");
 
 mkdirSync(outputDir, { recursive: true });
 
-console.log('TypeScript generation from OpenAPI specs started...\n');
+console.log("TypeScript generation from OpenAPI specs started...\n");
 
-const useLocalFiles = process.env.USE_LOCAL_SPECS === 'true';
-const apiGatewayUrl = process.env.VITE_API_GATEWAY_URL || 'http://localhost:4004';
+const useLocalFiles = process.env.USE_LOCAL_SPECS === "true";
+const apiGatewayUrl = process.env.VITE_API_GATEWAY_URL || "http://localhost:4004";
 
 const specs = [
   {
-    name: 'auth',
+    name: "auth",
     url: `${apiGatewayUrl}/api-docs/auth`,
-    localFile: resolve(projectRoot, '..', 'project-mimi-server', 'api-specs', 'auth-service.yaml'),
-    output: join(outputDir, 'auth-api.ts'),
+    localFile: resolve(projectRoot, "..", "project-mimi-server", "api-specs", "auth-service.yaml"),
+    output: join(outputDir, "auth-api.ts"),
   },
   {
-    name: 'chat',
+    name: "chat",
     url: `${apiGatewayUrl}/api-docs/chat`,
     localFile: null,
-    output: join(outputDir, 'chat-api.ts'),
+    output: join(outputDir, "chat-api.ts"),
   },
 ];
 
 for (const spec of specs) {
   try {
-    let inputSource = '';
-    
+    let inputSource = "";
+
     if (useLocalFiles && spec.localFile) {
       try {
-        readFileSync(spec.localFile, 'utf-8');
+        readFileSync(spec.localFile, "utf-8");
         inputSource = spec.localFile;
         console.log(`Type generation for ${spec.name} from local file...`);
       } catch (error) {
@@ -51,10 +51,10 @@ for (const spec of specs) {
     }
 
     const command = `npx openapi-typescript "${inputSource}" -o "${spec.output}"`;
-    execSync(command, { 
+    execSync(command, {
       cwd: projectRoot,
-      stdio: 'inherit',
-      encoding: 'utf-8'
+      stdio: "inherit",
+      encoding: "utf-8",
     });
 
     console.log(`Types for ${spec.name} were successfully generated in ${spec.output}\n`);
@@ -67,4 +67,4 @@ for (const spec of specs) {
   }
 }
 
-console.log('Generation is complete!');
+console.log("Generation is complete!");

@@ -27,11 +27,7 @@ export const MessageInput = ({ onSend, isConnected }: MessageInputProps) => {
 
   return (
     <form onSubmit={handleSubmit} className="flex items-center gap-2">
-      <Input
-        placeholder="Message"
-        value={value}
-        onChange={(event) => setValue(event.target.value)}
-      />
+      <Input placeholder="Message" value={value} onChange={(event) => setValue(event.target.value)} />
       <Button type="submit" disabled={!canSend}>
         Send
       </Button>

@@ -1,37 +1,32 @@
-import { useState, useRef, type ReactNode } from 'react'
-import type { Toast } from './ToastContext'
-import { ToastContext } from './ToastContext'
+import { useState, useRef, type ReactNode } from "react";
+import type { Toast } from "./ToastContext";
+import { ToastContext } from "./ToastContext";
 
 export const ToastProvider = ({ children }: { children: ReactNode }) => {
-  const [toasts, setToasts] = useState<Toast[]>([])
-  const counterRef = useRef(0)
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const counterRef = useRef(0);
 
   const removeToast = (id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id))
-  }
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
 
-  const addToast = (toast: Omit<Toast, 'id'>) => {
-    const id = `toast-${++counterRef.current}`
+  const addToast = (toast: Omit<Toast, "id">) => {
+    const id = `toast-${++counterRef.current}`;
     const newToast: Toast = {
       ...toast,
       id,
       duration: toast.duration ?? 5000,
-    }
-    
-    setToasts((prev) => [...prev, newToast])
+    };
+
+    setToasts((prev) => [...prev, newToast]);
 
     // Automatically remove after duration
     if (newToast.duration && newToast.duration > 0) {
       setTimeout(() => {
-        removeToast(id)
-      }, newToast.duration)
+        removeToast(id);
+      }, newToast.duration);
     }
-  }
+  };
 
-  return (
-    <ToastContext.Provider value={{ toasts, addToast, removeToast }}>
-      {children}
-    </ToastContext.Provider>
-  )
-}
-
+  return <ToastContext.Provider value={{ toasts, addToast, removeToast }}>{children}</ToastContext.Provider>;
+};

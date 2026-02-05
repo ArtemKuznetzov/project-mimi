@@ -1,34 +1,34 @@
-import { useMemo, useState } from 'react'
-import { DialogsHeader } from '@/features/dialogs/ui/DialogsHeader'
-import { DialogsList } from '@/features/dialogs/ui/DialogsList'
+import { useMemo, useState } from "react";
+import { DialogsHeader } from "@/features/dialogs/ui/DialogsHeader";
+import { DialogsList } from "@/features/dialogs/ui/DialogsList";
 import { useGetDialogsQuery } from "@/features/dialogs/api/dialogsApi";
 
 export const DialogsPage = () => {
-  const [isSearchMode, setIsSearchMode] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
+  const [isSearchMode, setIsSearchMode] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: dialogsData = [] } = useGetDialogsQuery(undefined, {
     refetchOnMountOrArgChange: true,
-  })
+  });
 
   const filteredDialogs = useMemo(() => {
     if (!searchQuery.trim()) {
-      return dialogsData
+      return dialogsData;
     }
-    const query = searchQuery.toLowerCase()
-    return dialogsData.filter((message) => (message.userName ?? '').toLowerCase().includes(query))
-  }, [dialogsData, searchQuery])
+    const query = searchQuery.toLowerCase();
+    return dialogsData.filter((message) => (message.userName ?? "").toLowerCase().includes(query));
+  }, [dialogsData, searchQuery]);
 
   const handleSearchToggle = () => {
-    setIsSearchMode((prev) => !prev)
+    setIsSearchMode((prev) => !prev);
     if (isSearchMode) {
-      setSearchQuery('')
+      setSearchQuery("");
     }
-  }
+  };
 
   const handleSearchClear = () => {
-    setSearchQuery('')
-  }
+    setSearchQuery("");
+  };
 
   return (
     <div className="space-y-6">
@@ -41,5 +41,5 @@ export const DialogsPage = () => {
       />
       <DialogsList dialogs={filteredDialogs} />
     </div>
-  )
-}
+  );
+};

@@ -6,12 +6,10 @@ export const messagesApi = baseApi.injectEndpoints({
     getMessages: builder.query<MessageResponseDTO[], number>({
       query: (dialogId) => ({
         url: `chat/messages/${dialogId}`,
-        method: "GET"
-      })
-    })
-  })
-})
+        method: "GET",
+      }),
+    }),
+  }),
+});
 
-export const {
-  useGetMessagesQuery
-} = messagesApi
+export const { useGetMessagesQuery } = messagesApi;

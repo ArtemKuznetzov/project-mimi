@@ -3,7 +3,7 @@ import type { ImgHTMLAttributes, SyntheticEvent } from "react";
 import { cn } from "@/lib/utils";
 import { mediaViewUrl, DEFAULT_AVATAR_URL } from "@/shared/lib/mediaUrls";
 
-interface UserAvatarProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, 'src'> {
+interface UserAvatarProps extends Omit<ImgHTMLAttributes<HTMLImageElement>, "src"> {
   avatarId?: string;
 }
 
@@ -29,4 +29,4 @@ const UserAvatar = ({ avatarId, alt, className, ...props }: UserAvatarProps) => 
   );
 };
 
-export { UserAvatar }
+export { UserAvatar };

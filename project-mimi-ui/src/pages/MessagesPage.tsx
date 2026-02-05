@@ -9,52 +9,50 @@ import type { MessageResponseDTO } from "@/shared/api/generated";
 import { useWebsoket } from "@/shared/lib/websoket/useWebsoket";
 
 export const MessagesPage = () => {
-  const { dialogId } = useParams()
-  const dialogIdInt = Number(dialogId)
+  const { dialogId } = useParams();
+  const dialogIdInt = Number(dialogId);
 
-  const { data: dialog } = useGetDialogByIdQuery(dialogIdInt)
-  const { data: messagesData = [] } = useGetMessagesQuery(dialogIdInt)
-  const [liveMessagesByDialog, setLiveMessagesByDialog] = useState<
-    Record<number, MessageResponseDTO[]>
-  >({})
+  const { data: dialog } = useGetDialogByIdQuery(dialogIdInt);
+  const { data: messagesData = [] } = useGetMessagesQuery(dialogIdInt);
+  const [liveMessagesByDialog, setLiveMessagesByDialog] = useState<Record<number, MessageResponseDTO[]>>({});
 
   const handleMessage = useCallback(
     (message: MessageResponseDTO) => {
       setLiveMessagesByDialog((prev) => {
-        const current = prev[dialogIdInt] ?? []
-        const existsInLive = current.some((item) => item.id === message.id)
-        const existsInInitial = messagesData.some((item) => item.id === message.id)
+        const current = prev[dialogIdInt] ?? [];
+        const existsInLive = current.some((item) => item.id === message.id);
+        const existsInInitial = messagesData.some((item) => item.id === message.id);
         if (existsInLive || existsInInitial) {
-          return prev
+          return prev;
         }
         return {
           ...prev,
           [dialogIdInt]: [...current, message],
-        }
-      })
+        };
+      });
     },
-    [dialogIdInt, messagesData]
-  )
+    [dialogIdInt, messagesData],
+  );
 
   const { sendMessage, isConnected } = useWebsoket({
     dialogId: dialogIdInt,
     onMessage: handleMessage,
-  })
+  });
 
   const messages = useMemo(() => {
-    const liveMessages = liveMessagesByDialog[dialogIdInt] ?? []
+    const liveMessages = liveMessagesByDialog[dialogIdInt] ?? [];
     if (liveMessages.length === 0) {
-      return messagesData
+      return messagesData;
     }
-    const merged = [...messagesData]
+    const merged = [...messagesData];
     for (const message of liveMessages) {
-      const exists = merged.some((item) => item.id === message.id)
+      const exists = merged.some((item) => item.id === message.id);
       if (!exists) {
-        merged.push(message)
+        merged.push(message);
       }
     }
-    return merged
-  }, [dialogIdInt, liveMessagesByDialog, messagesData])
+    return merged;
+  }, [dialogIdInt, liveMessagesByDialog, messagesData]);
 
   return (
     <div className="space-y-6">
@@ -62,5 +60,5 @@ export const MessagesPage = () => {
       <MessageList messages={messages} dialogId={dialogIdInt} />
       <MessageInput onSend={sendMessage} isConnected={isConnected} />
     </div>
-  )
-}
+  );
+};

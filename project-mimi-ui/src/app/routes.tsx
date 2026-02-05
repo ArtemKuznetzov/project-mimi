@@ -1,19 +1,19 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
-import type { ReactNode } from 'react'
-import { LoginPage, FeedPage, DialogsPage, ProfilePage } from '@/pages'
-import { AppLayout } from './layouts/AppLayout'
-import { useAppSelector } from './hooks'
+import { Routes, Route, Navigate } from "react-router-dom";
+import type { ReactNode } from "react";
+import { LoginPage, FeedPage, DialogsPage, ProfilePage } from "@/pages";
+import { AppLayout } from "./layouts/AppLayout";
+import { useAppSelector } from "./hooks";
 import { MessagesPage } from "@/pages/MessagesPage";
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
-  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated)
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />
-}
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+};
 
 const PublicRoute = ({ children }: { children: ReactNode }) => {
-  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated)
-  return !isAuthenticated ? <>{children}</> : <Navigate to="/feed" replace />
-}
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  return !isAuthenticated ? <>{children}</> : <Navigate to="/feed" replace />;
+};
 
 export const AppRoutes = () => {
   return (
@@ -42,6 +42,5 @@ export const AppRoutes = () => {
       </Route>
       <Route path="*" element={<Navigate to="/feed" replace />} />
     </Routes>
-  )
-}
-
+  );
+};
