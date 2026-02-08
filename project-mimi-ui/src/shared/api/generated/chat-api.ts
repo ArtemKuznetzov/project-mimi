@@ -4,156 +4,157 @@
  */
 
 export interface paths {
-  "/messages/{dialogId}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/messages/{dialogId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getMessages"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations["getMessages"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/dialogs": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/dialogs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getDialogs"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations["getDialogs"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/dialogs/{dialogId}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/dialogs/{dialogId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getDialogById"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations["getDialogById"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-  schemas: {
-    MessageResponseDTO: {
-      /** Format: int64 */
-      id: number;
-      /** Format: int64 */
-      dialogId: number;
-      body: string;
-      isEdited: boolean;
-      /** Format: date-time */
-      createdAt: string;
-      userName: string;
-      /** Format: int64 */
-      userId: number;
-      userAvatarId?: string;
+    schemas: {
+        MessageResponseDTO: {
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            dialogId: number;
+            body: string;
+            isEdited: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            userName: string;
+            /** Format: int64 */
+            userId: number;
+            userAvatarId?: string;
+            clientId?: string;
+        };
+        DialogResponseDTO: {
+            /** Format: int64 */
+            id: number;
+            /** Format: int64 */
+            userId: number;
+            userName: string;
+            userAvatarId?: string;
+            lastMessageBody?: string;
+            /** Format: date-time */
+            lastMessageDate?: string;
+            /** Format: int64 */
+            lastMessageUserId?: number;
+        };
     };
-    DialogResponseDTO: {
-      /** Format: int64 */
-      id: number;
-      /** Format: int64 */
-      userId: number;
-      userName: string;
-      userAvatarId?: string;
-      lastMessageBody?: string;
-      /** Format: date-time */
-      lastMessageDate?: string;
-      /** Format: int64 */
-      lastMessageUserId?: number;
-    };
-  };
-  responses: never;
-  parameters: never;
-  requestBodies: never;
-  headers: never;
-  pathItems: never;
+    responses: never;
+    parameters: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-  getMessages: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        dialogId: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    getMessages: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dialogId: number;
+            };
+            cookie?: never;
         };
-        content: {
-          "*/*": components["schemas"]["MessageResponseDTO"][];
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MessageResponseDTO"][];
+                };
+            };
         };
-      };
     };
-  };
-  getDialogs: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    getDialogs: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-        content: {
-          "*/*": components["schemas"]["DialogResponseDTO"][];
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DialogResponseDTO"][];
+                };
+            };
         };
-      };
     };
-  };
-  getDialogById: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        dialogId: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
+    getDialogById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dialogId: number;
+            };
+            cookie?: never;
         };
-        content: {
-          "*/*": components["schemas"]["DialogResponseDTO"];
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DialogResponseDTO"];
+                };
+            };
         };
-      };
     };
-  };
 }

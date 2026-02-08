@@ -14,5 +14,6 @@ public record MessageResponseDTO(
 
         @NotBlank String userName,
         @NotNull Long userId,
-        String userAvatarId
+        String userAvatarId,
+        String clientId
 ) {}

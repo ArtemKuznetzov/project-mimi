@@ -1,0 +1,1 @@
+export type { UiMessage } from './model/types'

@@ -40,7 +40,7 @@ public class MessageService {
 
         return messageList
                 .stream()
-                .map(m -> messageMapper.toDto(m,dialogId,dialogUsers.get(m.getAuthorId())))
+                .map(m -> messageMapper.toDto(m, dialogId, dialogUsers.get(m.getAuthorId()), null))
                 .toList();
     }
 
@@ -63,6 +63,6 @@ public class MessageService {
         Message saved = messageRepository.save(message);
         dialog.setLastMessageId(saved.getId());
         dialog.setUpdatedAt(saved.getCreatedAt());
-        return messageMapper.toDto(saved, dialogId, user);
+        return messageMapper.toDto(saved, dialogId, user, dto.clientId());
     }
 }

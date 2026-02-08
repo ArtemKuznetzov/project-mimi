@@ -1,12 +1,11 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useGetDialogByIdQuery } from "@/features/dialogs/api/dialogsApi";
 import { useGetMessagesQuery } from "@/features/messages/api/messagesApi";
 import { MessageList, type MessageListHandle } from "@/features/messages/ui/MessageList";
 import { MessageInput } from "@/features/messages/ui/MessageInput";
 import { MessageHeader } from "@/features/messages/ui/MessageHeader";
-import type { MessageResponseDTO } from "@/shared/api/generated";
-import { useWebsoket } from "@/shared/lib/websoket/useWebsoket";
+import { useDialogMessagesState } from "@/features/messages/useDialogMessagesState";
 import { useAppSelector } from "@/app/hooks";
 
 export const MessagesPage = () => {
@@ -16,56 +15,24 @@ export const MessagesPage = () => {
   const { data: dialog } = useGetDialogByIdQuery(dialogIdInt);
   const { data: messagesData = [] } = useGetMessagesQuery(dialogIdInt);
   const currentUserId = useAppSelector((state) => state.auth.userId);
-  const [liveMessagesByDialog, setLiveMessagesByDialog] = useState<Record<number, MessageResponseDTO[]>>({});
   const listHandleRef = useRef<MessageListHandle | null>(null);
 
-  const handleMessage = useCallback(
-    (message: MessageResponseDTO) => {
-      setLiveMessagesByDialog((prev) => {
-        const current = prev[dialogIdInt] ?? [];
-        const existsInLive = current.some((item) => item.id === message.id);
-        const existsInInitial = messagesData.some((item) => item.id === message.id);
-        if (existsInLive || existsInInitial) {
-          return prev;
-        }
-        return {
-          ...prev,
-          [dialogIdInt]: [...current, message],
-        };
-      });
-
-      if (currentUserId !== null && message.userId === currentUserId) {
-        requestAnimationFrame(() => listHandleRef.current?.scrollToBottom("smooth"));
-      }
-    },
-    [dialogIdInt, messagesData, currentUserId],
-  );
-
-  const { sendMessage, isConnected } = useWebsoket({
+  const { messages, onSendMessage } = useDialogMessagesState({
     dialogId: dialogIdInt,
-    onMessage: handleMessage,
+    messagesData,
+    currentUserId,
+    listHandleRef,
   });
-
-  const messages = useMemo(() => {
-    const liveMessages = liveMessagesByDialog[dialogIdInt] ?? [];
-    if (liveMessages.length === 0) {
-      return messagesData;
-    }
-    const merged = [...messagesData];
-    for (const message of liveMessages) {
-      const exists = merged.some((item) => item.id === message.id);
-      if (!exists) {
-        merged.push(message);
-      }
-    }
-    return merged;
-  }, [dialogIdInt, liveMessagesByDialog, messagesData]);
 
   return (
     <div className="space-y-6">
       <MessageHeader dialog={dialog} />
-      <MessageList messages={messages} dialogId={dialogIdInt} ref={listHandleRef} />
-      <MessageInput onSend={sendMessage} isConnected={isConnected} />
+      <MessageList
+        messages={messages}
+        dialogId={dialogIdInt}
+        ref={listHandleRef}
+      />
+      <MessageInput onSend={onSendMessage} />
     </div>
   );
 };

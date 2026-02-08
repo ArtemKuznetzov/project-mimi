@@ -24,6 +24,16 @@ public class ChatSocketController {
 
     @MessageMapping("/dialogs/{dialogId}/send")
     public void sendMessage(@DestinationVariable Long dialogId, MessageCreateDTO dto, Principal principal) {
+        Long userId = getUserIdInDialog(dialogId, principal);
+        MessageResponseDTO saved = messageService.saveMessage(dialogId, userId, dto);
+
+        if (saved != null) {
+            messagingTemplate.convertAndSend("/topic/dialogs/" + dialogId, saved);
+            log.debug("Message sent to dialog {} by user {}", dialogId, userId);
+        }
+    }
+
+    private Long getUserIdInDialog(Long dialogId, Principal principal) {
         if (principal == null) {
             log.warn("Unauthorized attempt to send message to dialog {}", dialogId);
             throw new AccessDeniedException("User not authenticated");
@@ -36,10 +46,6 @@ public class ChatSocketController {
             throw new AccessDeniedException("User is not a participant of this dialog");
         }
 
-        MessageResponseDTO saved = messageService.saveMessage(dialogId, userId, dto);
-        if (saved != null) {
-            messagingTemplate.convertAndSend("/topic/dialogs/" + dialogId, saved);
-            log.debug("Message sent to dialog {} by user {}", dialogId, userId);
-        }
+        return userId;
     }
 }

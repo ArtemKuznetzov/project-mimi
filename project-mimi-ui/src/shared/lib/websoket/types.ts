@@ -1,3 +1,4 @@
 export type MessageCreatePayload = {
-  body: string;
+    body: string;
+    clientId?: string;
 };

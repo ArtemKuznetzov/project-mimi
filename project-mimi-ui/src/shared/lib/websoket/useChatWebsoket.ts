@@ -8,13 +8,13 @@ import type { RootState } from "@/app/store";
 
 type UseWebsoketOptions = {
   dialogId: number;
-  onMessage?: (message: MessageResponseDTO) => void;
+  onMessage: (message: MessageResponseDTO) => void;
 };
 
-export const useWebsoket = ({ dialogId, onMessage }: UseWebsoketOptions) => {
+export const useChatWebsoket = ({ dialogId, onMessage }: UseWebsoketOptions) => {
   const [isConnected, setIsConnected] = useState(false);
   const clientRef = useRef<Client | null>(null);
-  const subscriptionRef = useRef<StompSubscription | null>(null);
+  const messageSubscriptionRef = useRef<StompSubscription | null>(null);
   const onMessageRef = useRef(onMessage);
   const accessToken = useSelector((state: RootState) => state.auth.accessToken);
 
@@ -37,8 +37,9 @@ export const useWebsoket = ({ dialogId, onMessage }: UseWebsoketOptions) => {
 
     client.onConnect = () => {
       setIsConnected(true);
-      subscriptionRef.current?.unsubscribe();
-      subscriptionRef.current = client.subscribe(`/topic/dialogs/${dialogId}`, (frame: IMessage) => {
+
+      messageSubscriptionRef.current?.unsubscribe();
+      messageSubscriptionRef.current = client.subscribe(`/topic/dialogs/${dialogId}`, (frame: IMessage) => {
         if (!frame.body) {
           return;
         }
@@ -72,8 +73,9 @@ export const useWebsoket = ({ dialogId, onMessage }: UseWebsoketOptions) => {
     client.activate();
 
     return () => {
-      subscriptionRef.current?.unsubscribe();
-      subscriptionRef.current = null;
+      messageSubscriptionRef.current?.unsubscribe();
+      messageSubscriptionRef.current = null;
+
       client.deactivate();
       clientRef.current = null;
       setIsConnected(false);

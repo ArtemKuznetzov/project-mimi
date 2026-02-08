@@ -12,5 +12,6 @@ public interface MessageMapper {
     @Mapping(target = "userName", source = "user.displayName")
     @Mapping(target = "userId", source = "user.id")
     @Mapping(target = "userAvatarId", source = "user.avatarId")
-    MessageResponseDTO toDto(Message message, Long dialogId, UserPublicDTO user);
+    @Mapping(target = "clientId", source = "clientId")
+    MessageResponseDTO toDto(Message message, Long dialogId, UserPublicDTO user, String clientId);
 }

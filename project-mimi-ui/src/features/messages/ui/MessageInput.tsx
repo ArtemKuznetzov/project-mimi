@@ -5,24 +5,21 @@ import { Button, Input } from "@/shared/ui";
 
 type MessageInputProps = {
   onSend: (payload: MessageCreatePayload) => boolean;
-  isConnected?: boolean;
 };
 
-export const MessageInput = ({ onSend, isConnected }: MessageInputProps) => {
+export const MessageInput = ({ onSend }: MessageInputProps) => {
   const [value, setValue] = useState("");
   const userId = useAppSelector((state) => state.auth.userId);
   const trimmedValue = value.trim();
-  const canSend = Boolean(userId) && (isConnected ?? true) && trimmedValue.length > 0;
+  const canSend = Boolean(userId) && trimmedValue.length > 0;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!canSend) {
       return;
     }
-    const sent = onSend({ body: trimmedValue });
-    if (sent) {
-      setValue("");
-    }
+    onSend({ body: trimmedValue });
+    setValue("");
   };
 
   return (
