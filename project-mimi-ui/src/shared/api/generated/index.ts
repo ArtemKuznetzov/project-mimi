@@ -7,5 +7,5 @@ export type TokenValidationResultDTO = AuthApiComponentsType["schemas"]["TokenVa
 export type UserPublicDTO = AuthApiComponentsType["schemas"]["UserPublicDTO"];
 
 export type DialogResponseDTO = ChatApiComponentsType["schemas"]["DialogResponseDTO"];
-
+export type DialogReadStateDTO = ChatApiComponentsType["schemas"]["DialogReadStateDTO"];
 export type MessageResponseDTO = ChatApiComponentsType["schemas"]["MessageResponseDTO"];

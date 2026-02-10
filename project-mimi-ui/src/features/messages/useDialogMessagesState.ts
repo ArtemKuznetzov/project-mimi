@@ -2,7 +2,7 @@ import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { RefObject } from "react";
 import type { MessageResponseDTO } from "@/shared/api/generated";
 import { useChatWebsoket } from "@/shared/lib/websoket/useChatWebsoket";
-import type { MessageCreatePayload } from "@/shared/lib/websoket/types";
+import type { MessageCreatePayload, ReadReceiptEvent } from "@/shared/lib/websoket/types";
 import type { UiMessage } from "@/entities/message";
 import type { MessageListHandle } from "@/features/messages/ui/MessageList";
 
@@ -11,6 +11,7 @@ type UseDialogMessagesStateOptions = {
   messagesData: MessageResponseDTO[];
   currentUserId: number | null;
   listHandleRef: RefObject<MessageListHandle | null>;
+  onReadReceipt?: (event: ReadReceiptEvent) => void;
 };
 
 type UseDialogMessagesStateResult = {
@@ -23,8 +24,9 @@ export const useDialogMessagesState = ({
   messagesData,
   currentUserId,
   listHandleRef,
+  onReadReceipt,
 }: UseDialogMessagesStateOptions): UseDialogMessagesStateResult => {
-  const [liveMessagesByDialog, setLiveMessagesByDialog] = useState<Record<number, UiMessage[]>>({});
+  const [liveMessagesByDialog, setLiveMessagesByDialog] = useState<Record<number, MessageResponseDTO[]>>({});
   const [localMessagesByDialog, setLocalMessagesByDialog] = useState<Record<number, UiMessage[]>>({});
 
   const pendingScrollRef = useRef<string | null>(null);
@@ -69,6 +71,7 @@ export const useDialogMessagesState = ({
   const { sendMessage } = useChatWebsoket({
     dialogId,
     onMessage: handleMessage,
+    onReadReceipt,
   });
 
   const onSendMessage = useCallback(

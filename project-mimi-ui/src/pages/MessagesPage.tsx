@@ -6,6 +6,7 @@ import { MessageList, type MessageListHandle } from "@/features/messages/ui/Mess
 import { MessageInput } from "@/features/messages/ui/MessageInput";
 import { MessageHeader } from "@/features/messages/ui/MessageHeader";
 import { useDialogMessagesState } from "@/features/messages/useDialogMessagesState";
+import { useDialogReadState } from "@/features/messages/useDialogReadState";
 import { useAppSelector } from "@/app/hooks";
 
 export const MessagesPage = () => {
@@ -17,11 +18,17 @@ export const MessagesPage = () => {
   const currentUserId = useAppSelector((state) => state.auth.userId);
   const listHandleRef = useRef<MessageListHandle | null>(null);
 
+  const { otherLastReadMessageId, onReadCandidate, onReadReceipt } = useDialogReadState({
+    dialogId: dialogIdInt,
+    currentUserId,
+  });
+
   const { messages, onSendMessage } = useDialogMessagesState({
     dialogId: dialogIdInt,
     messagesData,
     currentUserId,
     listHandleRef,
+    onReadReceipt,
   });
 
   return (
@@ -30,6 +37,8 @@ export const MessagesPage = () => {
       <MessageList
         messages={messages}
         dialogId={dialogIdInt}
+        otherLastReadMessageId={otherLastReadMessageId}
+        onReadCandidate={onReadCandidate}
         ref={listHandleRef}
       />
       <MessageInput onSend={onSendMessage} />

@@ -3,24 +3,31 @@ import { useSelector } from "react-redux";
 import type { Client, IMessage, StompSubscription } from "@stomp/stompjs";
 import type { MessageResponseDTO } from "@/shared/api/generated";
 import { createStompClient } from "@/shared/lib/websoket/client";
-import type { MessageCreatePayload } from "@/shared/lib/websoket/types";
+import type { MessageCreatePayload, ReadReceiptEvent } from "@/shared/lib/websoket/types";
 import type { RootState } from "@/app/store";
 
 type UseWebsoketOptions = {
   dialogId: number;
   onMessage: (message: MessageResponseDTO) => void;
+  onReadReceipt?: (event: ReadReceiptEvent) => void;
 };
 
-export const useChatWebsoket = ({ dialogId, onMessage }: UseWebsoketOptions) => {
+export const useChatWebsoket = ({ dialogId, onMessage, onReadReceipt }: UseWebsoketOptions) => {
   const [isConnected, setIsConnected] = useState(false);
   const clientRef = useRef<Client | null>(null);
   const messageSubscriptionRef = useRef<StompSubscription | null>(null);
+  const readSubscriptionRef = useRef<StompSubscription | null>(null);
   const onMessageRef = useRef(onMessage);
+  const onReadReceiptRef = useRef(onReadReceipt);
   const accessToken = useSelector((state: RootState) => state.auth.accessToken);
 
   useEffect(() => {
     onMessageRef.current = onMessage;
   }, [onMessage]);
+
+  useEffect(() => {
+    onReadReceiptRef.current = onReadReceipt;
+  }, [onReadReceipt]);
 
   useEffect(() => {
     if (!Number.isFinite(dialogId)) {
@@ -50,6 +57,19 @@ export const useChatWebsoket = ({ dialogId, onMessage }: UseWebsoketOptions) => 
           // ignore invalid payloads
         }
       });
+
+      readSubscriptionRef.current?.unsubscribe();
+      readSubscriptionRef.current = client.subscribe(`/topic/dialogs/${dialogId}/read`, (frame: IMessage) => {
+        if (!frame.body) {
+          return;
+        }
+        try {
+          const payload = JSON.parse(frame.body) as ReadReceiptEvent;
+          onReadReceiptRef.current?.(payload);
+        } catch {
+          // ignore invalid payloads
+        }
+      });
     };
 
     client.onDisconnect = () => {
@@ -75,6 +95,8 @@ export const useChatWebsoket = ({ dialogId, onMessage }: UseWebsoketOptions) => 
     return () => {
       messageSubscriptionRef.current?.unsubscribe();
       messageSubscriptionRef.current = null;
+      readSubscriptionRef.current?.unsubscribe();
+      readSubscriptionRef.current = null;
 
       client.deactivate();
       clientRef.current = null;

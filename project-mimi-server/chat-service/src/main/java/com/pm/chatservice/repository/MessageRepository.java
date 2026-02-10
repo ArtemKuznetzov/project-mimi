@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long> {
     List<Message> findByDialog_Id(Long dialogId);
+
+    boolean existsByIdAndDialog_Id(Long id, Long dialogId);
 }

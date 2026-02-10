@@ -1,31 +1,45 @@
 import { cn } from "@/lib/utils";
 import { formatMessageTime } from "@/shared/lib/dateUtils";
-import type { UiMessage } from "@/entities/message";
-import { AlertCircle, Loader2 } from "lucide-react";
+import type { MessageStatus, UiMessage } from "@/entities/message/model/types";
+import { AlertCircle, Check, CheckCheck, Loader2 } from "lucide-react";
 
 type MessageBubbleProps = {
   message: UiMessage;
-  isMine?: boolean;
+  isMine: boolean;
+  status: MessageStatus | null;
   className?: string;
 };
 
-export const MessageBubble = ({ message, isMine, className }: MessageBubbleProps) => {
-  const { body, isEdited, createdAt, localStatus } = message;
+const statusLabels: Record<MessageStatus, string> = {
+  failed: "Error",
+  pending: "Pending",
+  sent: "Sent",
+  read: "Read",
+};
 
-  const getStatusIcon = () => {
-    if (!isMine) {
-      return null;
-    }
-    if (localStatus === "failed") {
-      return <AlertCircle size={10} className="text-red-500" />;
-    }
-    if (localStatus === "pending") {
-      return <Loader2 size={10} className="animate-spin text-muted-foreground" />;
-    }
+const getStatusIcon = (status: MessageBubbleProps['status'], isMine: boolean) => {
+  if (!isMine || !status) {
     return null;
-  };
+  }
+  if (status === "failed") {
+    return <AlertCircle size={10} className="text-red-500" />;
+  }
+  if (status === "pending") {
+    return <Loader2 size={10} className="animate-spin text-muted-foreground" />;
+  }
+  if (status === "read") {
+    return <CheckCheck size={12} className="text-blue-500" />;
+  }
+  if (status === "sent") {
+    return <Check size={12} className="text-muted-foreground" />;
+  }
+  return null;
+};
 
-  const statusIcon = getStatusIcon();
+export const MessageBubble = ({ message, isMine, status, className }: MessageBubbleProps) => {
+  const { body, isEdited, createdAt } = message;
+
+  const statusIcon = getStatusIcon(status, isMine);
 
   return (
     <div className={cn("flex min-w-0 max-w-full flex-col gap-1", isMine ? "items-end" : "items-start", className)}>
@@ -44,7 +58,11 @@ export const MessageBubble = ({ message, isMine, className }: MessageBubbleProps
           {formatMessageTime(createdAt)}
           {isEdited ? " • edited" : ""}
         </span>
-        {statusIcon ? <span className="inline-flex items-center">{statusIcon}</span> : null}
+        {statusIcon ? (
+          <span className="inline-flex items-center" title={status ? statusLabels[status] : undefined}>
+            {statusIcon}
+          </span>
+        ) : null}
       </div>
     </div>
   );

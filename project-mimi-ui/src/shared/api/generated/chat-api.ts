@@ -4,6 +4,22 @@
  */
 
 export interface paths {
+    "/dialogs/{dialogId}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["markDialogRead"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/messages/{dialogId}": {
         parameters: {
             query?: never;
@@ -52,10 +68,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/dialogs/{dialogId}/read-state": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["getDialogReadState"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        ReadReceiptDTO: {
+            /** Format: int64 */
+            lastReadMessageId: number;
+        };
+        DialogReadStateDTO: {
+            /** Format: int64 */
+            dialogId: number;
+            /** Format: int64 */
+            userId: number;
+            /** Format: int64 */
+            lastReadMessageId?: number;
+            /** Format: date-time */
+            lastReadAt?: string;
+            /** Format: int64 */
+            otherLastReadMessageId?: number;
+        };
         MessageResponseDTO: {
             /** Format: int64 */
             id: number;
@@ -93,6 +141,32 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    markDialogRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dialogId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReadReceiptDTO"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DialogReadStateDTO"];
+                };
+            };
+        };
+    };
     getMessages: {
         parameters: {
             query?: never;
@@ -153,6 +227,28 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["DialogResponseDTO"];
+                };
+            };
+        };
+    };
+    getDialogReadState: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dialogId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["DialogReadStateDTO"];
                 };
             };
         };

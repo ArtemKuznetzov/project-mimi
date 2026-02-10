@@ -1,1 +1,1 @@
-export type { UiMessage } from './model/types'
+export type { MessageStatus, UiMessage } from "./model/types";
