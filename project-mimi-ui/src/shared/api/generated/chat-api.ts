@@ -110,9 +110,10 @@ export interface components {
             /** Format: int64 */
             dialogId: number;
             body: string;
-            isEdited: boolean;
             /** Format: date-time */
             createdAt: string;
+            isDeleted?: boolean;
+            isEdited?: boolean;
             userName: string;
             /** Format: int64 */
             userId: number;

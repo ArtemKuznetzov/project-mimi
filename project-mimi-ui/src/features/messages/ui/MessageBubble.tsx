@@ -17,8 +17,8 @@ const statusLabels: Record<MessageStatus, string> = {
   read: "Read",
 };
 
-const getStatusIcon = (status: MessageBubbleProps['status'], isMine: boolean) => {
-  if (!isMine || !status) {
+const getStatusIcon = (status: MessageBubbleProps["status"], isMine: boolean, isDeleted: boolean) => {
+  if (!isMine || !status || isDeleted) {
     return null;
   }
   if (status === "failed") {
@@ -38,8 +38,9 @@ const getStatusIcon = (status: MessageBubbleProps['status'], isMine: boolean) =>
 
 export const MessageBubble = ({ message, isMine, status, className }: MessageBubbleProps) => {
   const { body, isEdited, createdAt } = message;
+  const isDeleted = Boolean(message.isDeleted);
 
-  const statusIcon = getStatusIcon(status, isMine);
+  const statusIcon = getStatusIcon(status, isMine, isDeleted);
 
   return (
     <div className={cn("flex min-w-0 max-w-full flex-col gap-1", isMine ? "items-end" : "items-start", className)}>
@@ -49,14 +50,16 @@ export const MessageBubble = ({ message, isMine, status, className }: MessageBub
           isMine
             ? "bg-blue-500 text-white rounded-br-sm"
             : "bg-gray-100 text-gray-900 rounded-bl-sm dark:bg-gray-800 dark:text-gray-100",
+          isDeleted ? "bg-gray-200 text-gray-500 italic dark:bg-gray-700 dark:text-gray-300" : null,
         )}
       >
-        <p className="min-w-10 whitespace-pre-wrap break-words break-all leading-snug">{body}</p>
+        {!isDeleted && <p className="min-w-10 whitespace-pre-wrap break-words break-all leading-snug">{body}</p>}
+        {isDeleted && <p className="min-w-10 whitespace-pre-wrap break-words break-all leading-snug">Message deleted</p>}
       </div>
       <div className={cn("flex items-center gap-1 text-[10px] leading-none")}>
         <span className="whitespace-nowrap">
           {formatMessageTime(createdAt)}
-          {isEdited ? " • edited" : ""}
+          {!isDeleted && isEdited ? " • edited" : ""}
         </span>
         {statusIcon ? (
           <span className="inline-flex items-center" title={status ? statusLabels[status] : undefined}>

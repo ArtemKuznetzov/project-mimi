@@ -25,7 +25,7 @@ public interface DialogRepository extends JpaRepository<Dialog, Long> {
            "m.authorId) " +
            "FROM Dialog d " +
            "LEFT JOIN Message m ON m.id = (" +
-           "    SELECT MAX(m2.id) FROM Message m2 WHERE m2.dialog.id = d.id" +
+           "    SELECT MAX(m2.id) FROM Message m2 WHERE m2.dialog.id = d.id AND m2.isDeleted = false" +
            ") " +
            "WHERE EXISTS (SELECT 1 FROM DialogParticipant p1 " +
            "              WHERE p1.id.dialogId = d.id AND p1.id.userId = :currentUserId)")
@@ -45,7 +45,7 @@ public interface DialogRepository extends JpaRepository<Dialog, Long> {
            "m.authorId) " +
            "FROM Dialog d " +
            "LEFT JOIN Message m ON m.id = (" +
-           "    SELECT MAX(m2.id) FROM Message m2 WHERE m2.dialog.id = d.id" +
+           "    SELECT MAX(m2.id) FROM Message m2 WHERE m2.dialog.id = d.id AND m2.isDeleted = false" +
            ") " +
            "WHERE d.id = :dialogId " +
            "AND EXISTS (SELECT 1 FROM DialogParticipant p1 " +

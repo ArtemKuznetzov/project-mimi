@@ -1,9 +1,11 @@
-import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef } from "react";
+import {forwardRef, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState} from "react";
+import type { MouseEvent as ReactMouseEvent } from "react";
 import { useAppSelector } from "@/app/hooks";
 import { UserAvatar } from "@/shared/ui";
 import { cn } from "@/lib/utils";
 import { MessageBubble } from "@/features/messages/ui/MessageBubble";
 import type { MessageStatus, UiMessage } from "@/entities/message/model/types";
+import {MessageActions} from "@/features/messages/ui/MessageActions";
 
 const dialogScrollPositions = new Map<number, number>();
 
@@ -12,15 +14,26 @@ export type MessageListHandle = {
   isNearBottom: (threshold: number) => boolean;
 };
 
+type MenuState = {
+  id: number;
+  x: number;
+  y: number;
+  canReply: boolean;
+  canEdit: boolean;
+  canDelete: boolean;
+}
+
 type MessageListProps = {
   messages: UiMessage[];
   dialogId: number;
-  otherLastReadMessageId?: number | null;
-  onReadCandidate?: (messageId: number) => void;
+  otherLastReadMessageId: number | null;
+  onReadCandidate: (messageId: number) => void;
+  onDeleteMessage: (messageId: number) => void;
+  onEditMessage: (messageId: number, body: string) => void;
 };
 
 export const MessageList = forwardRef<MessageListHandle, MessageListProps>(
-  ({ messages, dialogId, otherLastReadMessageId, onReadCandidate }: MessageListProps, ref) => {
+  ({ messages, dialogId, otherLastReadMessageId, onReadCandidate, onDeleteMessage }: MessageListProps, ref) => {
     const currentUserId = useAppSelector((state) => state.auth.userId);
     const listRef = useRef<HTMLUListElement | null>(null);
     const lastDialogIdRef = useRef<number | null>(null);
@@ -28,6 +41,25 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(
     const observerRef = useRef<IntersectionObserver | null>(null);
     const visibleIdsRef = useRef<Set<number>>(new Set());
     const maxReportedRef = useRef(0);
+    const [menuState, setMenuState] = useState<MenuState | null>(null);
+
+    const handleContextMenu = useCallback(
+      (event: ReactMouseEvent<HTMLDivElement>, message: UiMessage, isMine: boolean) => {
+        event.preventDefault();
+        if (message.isDeleted) {
+          return;
+        }
+        setMenuState({
+          id: message.id,
+          x: event.clientX,
+          y: event.clientY,
+          canReply: !message.isDeleted,
+          canEdit: isMine && !message.isDeleted,
+          canDelete: isMine && !message.isDeleted,
+        });
+      },
+      [],
+    );
 
     const scrollToBottom = (behavior: ScrollBehavior = "auto") => {
       const list = listRef.current;
@@ -194,12 +226,26 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(
               className={cn("flex items-end gap-3", isMine ? "justify-end" : "justify-start")}
             >
               {!isMine && <UserAvatar avatarId={message.userAvatarId} alt={message.userName} className="h-9 w-9" />}
-              <div className={cn("max-w-[70%] min-w-0 space-y-1 flex flex-col", isMine ? "items-end" : "items-start")}>
+              <div
+                className={cn("max-w-[70%] min-w-0 space-y-1 flex flex-col", isMine ? "items-end" : "items-start")}
+                onContextMenu={(event) => handleContextMenu(event, message, isMine)}
+              >
                 <MessageBubble message={message} isMine={isMine} status={status} />
               </div>
             </li>
           );
         })}
+        {menuState ? (
+          <MessageActions
+            x={menuState.x}
+            y={menuState.y}
+            canReply={menuState.canReply}
+            canEdit={menuState.canEdit}
+            canDelete={menuState.canDelete}
+            onClose={() => setMenuState(null)}
+            onDelete={() => onDeleteMessage(menuState.id)}
+          />
+        ) : null}
       </ul>
     );
   },

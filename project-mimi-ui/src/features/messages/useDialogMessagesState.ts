@@ -2,7 +2,7 @@ import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { RefObject } from "react";
 import type { MessageResponseDTO } from "@/shared/api/generated";
 import { useChatWebsoket } from "@/shared/lib/websoket/useChatWebsoket";
-import type { MessageCreatePayload, ReadReceiptEvent } from "@/shared/lib/websoket/types";
+import type {MessageAction, MessageCreatePayload, ReadReceiptEvent} from "@/shared/lib/websoket/types";
 import type { UiMessage } from "@/entities/message";
 import type { MessageListHandle } from "@/features/messages/ui/MessageList";
 
@@ -17,6 +17,8 @@ type UseDialogMessagesStateOptions = {
 type UseDialogMessagesStateResult = {
   messages: UiMessage[];
   onSendMessage: (payload: MessageCreatePayload) => boolean;
+  onDeleteMessage: (messageId: number) => boolean;
+  onEditMessage: (messageId: number, body: string) => boolean;
 };
 
 export const useDialogMessagesState = ({
@@ -32,14 +34,28 @@ export const useDialogMessagesState = ({
   const pendingScrollRef = useRef<string | null>(null);
 
   const handleMessage = useCallback(
-    (message: MessageResponseDTO) => {
+    (message: MessageResponseDTO, action: MessageAction) => {
       setLiveMessagesByDialog((prev) => {
         const current = prev[dialogId] ?? [];
         const existsInLive = current.some((item) => item.id === message.id);
         const existsInInitial = messagesData.some((item) => item.id === message.id);
+        if (action === "update" || action === "delete") {
+          if (existsInLive) {
+            return {
+              ...prev,
+              [dialogId]: current.map((item) => (item.id === message.id ? message : item)),
+            };
+          }
+          return {
+            ...prev,
+            [dialogId]: [...current, message],
+          };
+        }
+
         if (existsInLive || existsInInitial) {
           return prev;
         }
+
         return {
           ...prev,
           [dialogId]: [...current, message],
@@ -61,14 +77,14 @@ export const useDialogMessagesState = ({
         });
       }
 
-      if (currentUserId !== null && message.userId === currentUserId) {
+      if (currentUserId !== null && message.userId === currentUserId && action === "send") {
         requestAnimationFrame(() => listHandleRef.current?.scrollToBottom("smooth"));
       }
     },
     [dialogId, messagesData, currentUserId, listHandleRef],
   );
 
-  const { sendMessage } = useChatWebsoket({
+  const { sendMessage, sendUpdateMessage, sendDeleteMessage } = useChatWebsoket({
     dialogId,
     onMessage: handleMessage,
     onReadReceipt,
@@ -111,6 +127,26 @@ export const useDialogMessagesState = ({
     [dialogId, currentUserId, sendMessage],
   );
 
+  const onDeleteMessage = useCallback(
+    (messageId: number) => {
+      if (!Number.isFinite(dialogId) || !Number.isFinite(messageId) || currentUserId === null) {
+        return false;
+      }
+      const isSent = sendDeleteMessage(dialogId, messageId);
+      return isSent;
+    }, [currentUserId, dialogId, sendDeleteMessage]
+  )
+
+  const onEditMessage = useCallback(
+    (messageId: number, body: string)=> {
+      if (!Number.isFinite(dialogId) || !Number.isFinite(messageId) || currentUserId === null) {
+        return false;
+      }
+      const isSent = sendUpdateMessage(dialogId, messageId, body);
+      return isSent;
+    }, [dialogId, currentUserId, sendUpdateMessage]
+  )
+
   const messages = useMemo(() => {
     const liveMessages = liveMessagesByDialog[dialogId] ?? [];
     const localMessages = localMessagesByDialog[dialogId] ?? [];
@@ -145,5 +181,5 @@ export const useDialogMessagesState = ({
     }
   }, [localMessagesByDialog, dialogId, listHandleRef]);
 
-  return { messages, onSendMessage };
+  return { messages, onSendMessage, onDeleteMessage, onEditMessage };
 };

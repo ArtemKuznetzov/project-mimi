@@ -1,6 +1,7 @@
 package com.pm.chatservice.controller;
 
 import com.pm.chatservice.dto.MessageCreateDTO;
+import com.pm.chatservice.dto.MessageUpdateDTO;
 import com.pm.chatservice.dto.MessageResponseDTO;
 import com.pm.chatservice.service.DialogService;
 import com.pm.chatservice.service.MessageService;
@@ -47,5 +48,30 @@ public class ChatSocketController {
         }
 
         return userId;
+    }
+
+    @MessageMapping("/dialogs/{dialogId}/delete/{messageId}")
+    public void deleteMessage(@DestinationVariable Long dialogId, @DestinationVariable Long messageId, Principal principal) {
+        Long userId = getUserIdInDialog(dialogId, principal);
+        MessageResponseDTO deletedMessage = messageService.deleteMessage(dialogId, messageId, userId);
+
+        if (deletedMessage != null) {
+            messagingTemplate.convertAndSend("/topic/dialogs/" + dialogId + "/delete", deletedMessage);
+        }
+    }
+
+    @MessageMapping("/dialogs/{dialogId}/update/{messageId}")
+    public void updateMessage(
+            @DestinationVariable Long dialogId,
+            @DestinationVariable Long messageId,
+            MessageUpdateDTO dto,
+            Principal principal
+    ) {
+        Long userId = getUserIdInDialog(dialogId, principal);
+        MessageResponseDTO updatedMessage = messageService.updateMessage(dialogId, messageId, userId, dto);
+
+        if (updatedMessage != null) {
+            messagingTemplate.convertAndSend("/topic/dialogs/" + dialogId + "/update", updatedMessage);
+        }
     }
 }

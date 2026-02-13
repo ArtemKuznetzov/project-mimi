@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface DialogParticipantRepository extends JpaRepository<DialogParticipant, DialogParticipantId> {
+    boolean existsById_DialogIdAndId_UserId(Long dialogId, Long userId);
 }

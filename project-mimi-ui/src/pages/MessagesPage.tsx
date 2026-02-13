@@ -23,7 +23,7 @@ export const MessagesPage = () => {
     currentUserId,
   });
 
-  const { messages, onSendMessage } = useDialogMessagesState({
+  const { messages, onSendMessage, onDeleteMessage, onEditMessage } = useDialogMessagesState({
     dialogId: dialogIdInt,
     messagesData,
     currentUserId,
@@ -39,6 +39,8 @@ export const MessagesPage = () => {
         dialogId={dialogIdInt}
         otherLastReadMessageId={otherLastReadMessageId}
         onReadCandidate={onReadCandidate}
+        onDeleteMessage={onDeleteMessage}
+        onEditMessage={onEditMessage}
         ref={listHandleRef}
       />
       <MessageInput onSend={onSendMessage} />

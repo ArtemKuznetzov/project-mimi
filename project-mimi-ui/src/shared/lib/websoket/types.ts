@@ -9,3 +9,5 @@ export type ReadReceiptEvent = {
     lastReadMessageId: number;
     readAt?: string | null;
 };
+
+export type MessageAction = "send" | "update" | "delete";

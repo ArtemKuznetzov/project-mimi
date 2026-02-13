@@ -9,8 +9,9 @@ public record MessageResponseDTO(
         @NotNull Long id,
         @NotNull Long dialogId,
         @NotNull String body,
-        @NotNull Boolean isEdited,
         @NotNull Instant createdAt,
+        Boolean isDeleted,
+        Boolean isEdited,
 
         @NotBlank String userName,
         @NotNull Long userId,
