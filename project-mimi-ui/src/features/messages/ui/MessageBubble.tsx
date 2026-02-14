@@ -37,7 +37,7 @@ const getStatusIcon = (status: MessageBubbleProps["status"], isMine: boolean, is
 };
 
 export const MessageBubble = ({ message, isMine, status, className }: MessageBubbleProps) => {
-  const { body, isEdited, createdAt } = message;
+  const { body, isEdited, createdAt, replyMessage } = message;
   const isDeleted = Boolean(message.isDeleted);
 
   const statusIcon = getStatusIcon(status, isMine, isDeleted);
@@ -46,15 +46,28 @@ export const MessageBubble = ({ message, isMine, status, className }: MessageBub
     <div className={cn("flex min-w-0 max-w-full flex-col gap-1", isMine ? "items-end" : "items-start", className)}>
       <div
         className={cn(
-          "min-w-0 max-w-full rounded-2xl px-3 py-2 text-sm shadow-sm",
+          "inline-flex w-fit max-w-full flex-col rounded-2xl px-3 py-2 text-sm shadow-sm",
           isMine
             ? "bg-blue-500 text-white rounded-br-sm"
             : "bg-gray-100 text-gray-900 rounded-bl-sm dark:bg-gray-800 dark:text-gray-100",
           isDeleted ? "bg-gray-200 text-gray-500 italic dark:bg-gray-700 dark:text-gray-300" : null,
         )}
       >
-        {!isDeleted && <p className="min-w-10 whitespace-pre-wrap break-words break-all leading-snug">{body}</p>}
-        {isDeleted && <p className="min-w-10 whitespace-pre-wrap break-words break-all leading-snug">Message deleted</p>}
+        {!isDeleted && replyMessage ? (
+          <div
+            className={cn(
+              "mb-2 w-full rounded-md border-l-2 px-2 py-1 text-[11px] leading-snug",
+              isMine
+                ? "border-white/60 bg-white/15 text-white/90"
+                : "border-blue-500/60 bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200",
+            )}
+          >
+            <div className="truncate font-medium">{replyMessage.userName}</div>
+            <div className="truncate opacity-80">{replyMessage.body}</div>
+          </div>
+        ) : null}
+        {!isDeleted && <p className="whitespace-pre-wrap break-words break-all leading-snug">{body}</p>}
+        {isDeleted && <p className="whitespace-pre-wrap break-words break-all leading-snug">Message deleted</p>}
       </div>
       <div className={cn("flex items-center gap-1 text-[10px] leading-none")}>
         <span className="whitespace-nowrap">

@@ -6,8 +6,10 @@ import { cn } from "@/lib/utils";
 import { MessageBubble } from "@/features/messages/ui/MessageBubble";
 import type { MessageStatus, UiMessage } from "@/entities/message/model/types";
 import {MessageActions} from "@/features/messages/ui/MessageActions";
+import {MessageReplyBlock} from "@/features/messages/ui/MessageReplyBlock";
 
 const dialogScrollPositions = new Map<number, number>();
+const REPLY_BLOCK_HEIGHT = 44;
 
 export type MessageListHandle = {
   scrollToBottom: (behavior: ScrollBehavior) => void;
@@ -15,7 +17,7 @@ export type MessageListHandle = {
 };
 
 type MenuState = {
-  id: number;
+  message: UiMessage;
   x: number;
   y: number;
   canReply: boolean;
@@ -23,17 +25,29 @@ type MenuState = {
   canDelete: boolean;
 }
 
-type MessageListProps = {
+export type MessageListProps = {
   messages: UiMessage[];
   dialogId: number;
   otherLastReadMessageId: number | null;
-  onReadCandidate: (messageId: number) => void;
-  onDeleteMessage: (messageId: number) => void;
-  onEditMessage: (messageId: number, body: string) => void;
+  messageActions: {
+    onReadCandidate: (messageId: number) => void;
+    onDeleteMessage: (messageId: number) => void;
+    onEditMessage: (message: UiMessage) => void;
+    onReplyMessage: (message: UiMessage) => void;
+  }
+  replyMessage?: UiMessage;
+  onCloseReply: () => void;
 };
 
 export const MessageList = forwardRef<MessageListHandle, MessageListProps>(
-  ({ messages, dialogId, otherLastReadMessageId, onReadCandidate, onDeleteMessage }: MessageListProps, ref) => {
+  ({
+    messages,
+    dialogId,
+    otherLastReadMessageId,
+    messageActions,
+    replyMessage,
+    onCloseReply,
+  }: MessageListProps, ref) => {
     const currentUserId = useAppSelector((state) => state.auth.userId);
     const listRef = useRef<HTMLUListElement | null>(null);
     const lastDialogIdRef = useRef<number | null>(null);
@@ -43,6 +57,8 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(
     const maxReportedRef = useRef(0);
     const [menuState, setMenuState] = useState<MenuState | null>(null);
 
+    const {onReplyMessage, onEditMessage, onDeleteMessage, onReadCandidate} = messageActions
+
     const handleContextMenu = useCallback(
       (event: ReactMouseEvent<HTMLDivElement>, message: UiMessage, isMine: boolean) => {
         event.preventDefault();
@@ -50,7 +66,7 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(
           return;
         }
         setMenuState({
-          id: message.id,
+          message,
           x: event.clientX,
           y: event.clientY,
           canReply: !message.isDeleted,
@@ -114,6 +130,17 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(
       }
       shouldRestoreRef.current = false;
     }, [dialogId, messages.length]);
+
+    useLayoutEffect(() => {
+      const list = listRef.current
+
+      if (list) {
+        const wasNearBottom = list.scrollHeight - list.scrollTop - list.clientHeight < REPLY_BLOCK_HEIGHT * 2;
+        if (replyMessage && wasNearBottom) {
+          requestAnimationFrame(() => scrollToBottom("auto"));
+        }
+      }
+    }, [replyMessage]);
 
     // Reset msg counter
     useEffect(() => {
@@ -201,52 +228,64 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(
     const readBoundary = otherLastReadMessageId ?? 0;
 
     return (
-      <ul
-        ref={listRef}
-        onScroll={handleScroll}
-        className="scrollbar max-h-[60vh] overflow-y-auto space-y-4 rounded-lg border bg-white p-4 pr-2 shadow-sm dark:bg-gray-900"
-      >
-        {messages.map((message: UiMessage) => {
-          const isMine = currentUserId !== null && message.userId === currentUserId;
-          const shouldObserve = !isMine && message.id > 0;
-          const status: MessageStatus | null = isMine
-            ? message.localStatus === "failed"
-              ? "failed"
-              : message.localStatus === "pending"
-                ? "pending"
-                : message.id > 0 && message.id <= readBoundary
-                  ? "read"
-                  : "sent"
-            : null;
-          return (
-            <li
-              key={message.id}
-              data-message-id={message.id}
-              data-read-observe={shouldObserve ? "true" : undefined}
-              className={cn("flex items-end gap-3", isMine ? "justify-end" : "justify-start")}
-            >
-              {!isMine && <UserAvatar avatarId={message.userAvatarId} alt={message.userName} className="h-9 w-9" />}
-              <div
-                className={cn("max-w-[70%] min-w-0 space-y-1 flex flex-col", isMine ? "items-end" : "items-start")}
-                onContextMenu={(event) => handleContextMenu(event, message, isMine)}
+      <div className="relative rounded-lg border bg-white shadow-sm dark:bg-gray-900">
+        <ul
+          ref={listRef}
+          onScroll={handleScroll}
+          className={cn(
+            "scrollbar max-h-[60vh] overflow-y-auto space-y-4 p-4 pr-2",
+            Boolean(replyMessage) && "pb-20",
+          )}
+        >
+          {messages.map((message: UiMessage) => {
+            const isMine = currentUserId !== null && message.userId === currentUserId;
+            const shouldObserve = !isMine && message.id > 0;
+            const status: MessageStatus | null = isMine
+              ? message.localStatus === "failed"
+                ? "failed"
+                : message.localStatus === "pending"
+                  ? "pending"
+                  : message.id > 0 && message.id <= readBoundary
+                    ? "read"
+                    : "sent"
+              : null;
+            return (
+              <li
+                key={message.id}
+                data-message-id={message.id}
+                data-read-observe={shouldObserve ? "true" : undefined}
+                className={cn("flex items-end gap-3", isMine ? "justify-end" : "justify-start")}
               >
-                <MessageBubble message={message} isMine={isMine} status={status} />
-              </div>
-            </li>
-          );
-        })}
-        {menuState ? (
-          <MessageActions
-            x={menuState.x}
-            y={menuState.y}
-            canReply={menuState.canReply}
-            canEdit={menuState.canEdit}
-            canDelete={menuState.canDelete}
-            onClose={() => setMenuState(null)}
-            onDelete={() => onDeleteMessage(menuState.id)}
-          />
+                {!isMine && <UserAvatar avatarId={message.userAvatarId} alt={message.userName} className="h-9 w-9" />}
+                <div
+                  className={cn("max-w-[70%] min-w-[min(200px,30vw)] space-y-1 flex flex-col", isMine ? "items-end" : "items-start")}
+                  onContextMenu={(event) => handleContextMenu(event, message, isMine)}
+                >
+                  <MessageBubble message={message} isMine={isMine} status={status} />
+                </div>
+              </li>
+            );
+          })}
+          {menuState ? (
+            <MessageActions
+              x={menuState.x}
+              y={menuState.y}
+              canReply={menuState.canReply}
+              canEdit={menuState.canEdit}
+              canDelete={menuState.canDelete}
+              onClose={() => setMenuState(null)}
+              onDelete={() => onDeleteMessage(menuState.message.id)}
+              onEdit={() => onEditMessage(menuState.message)}
+              onReply={() => onReplyMessage(menuState.message)}
+            />
+          ) : null}
+        </ul>
+        {replyMessage ? (
+          <div className="absolute bottom-0 left-0 right-0 px-4 pb-3">
+            <MessageReplyBlock message={replyMessage} onClose={onCloseReply} />
+          </div>
         ) : null}
-      </ul>
+      </div>
     );
   },
 );

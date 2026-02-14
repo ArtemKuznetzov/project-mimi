@@ -16,7 +16,7 @@ type UseDialogMessagesStateOptions = {
 
 type UseDialogMessagesStateResult = {
   messages: UiMessage[];
-  onSendMessage: (payload: MessageCreatePayload) => boolean;
+  onSendMessage: (payload: MessageCreatePayload, replyMessage?: UiMessage) => boolean;
   onDeleteMessage: (messageId: number) => boolean;
   onEditMessage: (messageId: number, body: string) => boolean;
 };
@@ -90,8 +90,8 @@ export const useDialogMessagesState = ({
     onReadReceipt,
   });
 
-  const onSendMessage = useCallback(
-    (payload: MessageCreatePayload) => {
+  const onSendMessage: UseDialogMessagesStateResult['onSendMessage'] = useCallback(
+    (payload, replyMessage) => {
       if (!Number.isFinite(dialogId) || currentUserId === null) {
         return false;
       }
@@ -106,6 +106,7 @@ export const useDialogMessagesState = ({
         userName: "",
         userId: currentUserId,
         clientId,
+        replyMessage,
         localStatus: "pending",
       };
       setLocalMessagesByDialog((prev) => ({
@@ -113,7 +114,7 @@ export const useDialogMessagesState = ({
         [dialogId]: [...(prev[dialogId] ?? []), optimisticMessage],
       }));
 
-      const isSent = sendMessage({ ...payload, clientId });
+      const isSent = sendMessage({ ...payload, replyMessageId: replyMessage?.id, clientId });
       if (!isSent) {
         setLocalMessagesByDialog((prev) => ({
           ...prev,

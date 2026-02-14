@@ -4,5 +4,6 @@ import jakarta.validation.constraints.NotBlank;
 
 public record MessageCreateDTO(
         @NotBlank String body,
-        String clientId
+        String clientId,
+        Long replyMessageId
 ) {}

@@ -2,7 +2,6 @@ package com.pm.chatservice.service;
 
 import com.pm.chatservice.authclient.model.UserPublicDTO;
 import com.pm.chatservice.client.AuthUserClient;
-import com.pm.chatservice.dto.DialogDataDTO;
 import com.pm.chatservice.dto.MessageCreateDTO;
 import com.pm.chatservice.dto.MessageResponseDTO;
 import com.pm.chatservice.dto.MessageUpdateDTO;
@@ -41,9 +40,24 @@ public class MessageService {
         Map<Long, UserPublicDTO> dialogUsers = authorIds.stream()
                 .collect(Collectors.toMap(id -> id, authUserClient::getUser));
 
+        Map<Long, Message> messagesById = messageList.stream()
+                .collect(Collectors.toMap(Message::getId, message -> message));
+
+
         return messageList
                 .stream()
-                .map(m -> messageMapper.toDto(m, dialogId, dialogUsers.get(m.getAuthorId()), null))
+                .map(message -> {
+                    MessageResponseDTO replyDto = null;
+                    Long replyMessageId = message.getReplyMessageId();
+                    if (replyMessageId != null) {
+                        Message replyMessage = messagesById.get(replyMessageId);
+                        if (replyMessage != null) {
+                            UserPublicDTO replyUser = dialogUsers.get(replyMessage.getAuthorId());
+                            replyDto = messageMapper.toDto(replyMessage, dialogId, replyUser, null, null);
+                        }
+                    }
+                    return messageMapper.toDto(message, dialogId, dialogUsers.get(message.getAuthorId()), null, replyDto);
+                })
                 .toList();
     }
 
@@ -54,11 +68,20 @@ public class MessageService {
         Objects.requireNonNull(dto, "message payload must not be null");
 
         UserPublicDTO user = authUserClient.getUser(userId);
+        Long replyMessageId = dto.replyMessageId();
+        MessageResponseDTO replyDto = null;
+        if (replyMessageId != null) {
+            replyDto = buildReplyDto(dialogId, replyMessageId);
+            if (replyDto == null) {
+                throw new ApiException(HttpStatus.NOT_FOUND, "REPLY_MESSAGE_NOT_FOUND", "Reply message not found");
+            }
+        }
 
         Message message = new Message();
         message.setBody(dto.body());
         message.setAuthorId(userId);
         message.setCreatedAt(Instant.now());
+        message.setReplyMessageId(replyMessageId);
 
         Dialog dialog = dialogRepository.getReferenceById(dialogId);
         message.setDialog(dialog);
@@ -66,7 +89,7 @@ public class MessageService {
         Message saved = messageRepository.save(message);
         dialog.setLastMessageId(saved.getId());
         dialog.setUpdatedAt(saved.getCreatedAt());
-        return messageMapper.toDto(saved, dialogId, user, dto.clientId());
+        return messageMapper.toDto(saved, dialogId, user, dto.clientId(), replyDto);
     }
 
     @Transactional
@@ -91,7 +114,8 @@ public class MessageService {
             dialog.setUpdatedAt(Instant.now());
         }
 
-        return messageMapper.toDto(saved, dialogId,user,null);
+        MessageResponseDTO replyDto = buildReplyDto(dialogId, message.getReplyMessageId());
+        return messageMapper.toDto(saved, dialogId,user,null, replyDto);
     }
 
     @Transactional
@@ -116,7 +140,20 @@ public class MessageService {
         message.setUpdatedAt(Instant.now());
 
         Message saved = messageRepository.save(message);
-        return messageMapper.toDto(saved, dialogId,user,null);
+        MessageResponseDTO replyDto = buildReplyDto(dialogId, message.getReplyMessageId());
+        return messageMapper.toDto(saved, dialogId, user, null, replyDto);
+    }
+
+    private MessageResponseDTO buildReplyDto(Long dialogId, Long replyMessageId) {
+        if (replyMessageId == null) {
+            return null;
+        }
+        Message replyMessage = messageRepository.findByIdAndDialog_Id(replyMessageId, dialogId).orElse(null);
+        if (replyMessage == null) {
+            return null;
+        }
+        UserPublicDTO replyUser = authUserClient.getUser(replyMessage.getAuthorId());
+        return messageMapper.toDto(replyMessage, dialogId, replyUser, null, null);
     }
 
     private Message getMessageFromDialog(Long dialogId, Long messageId, Long userId) {

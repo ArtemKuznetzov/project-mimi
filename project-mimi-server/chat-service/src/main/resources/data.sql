@@ -21,11 +21,13 @@ CREATE TABLE IF NOT EXISTS messages (
     dialog_id BIGINT NOT NULL,
     author_id BIGINT NOT NULL,
     body TEXT NOT NULL,
+    reply_message_id BIGINT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ,
     is_edited BOOLEAN NOT NULL DEFAULT FALSE,
     is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
-    FOREIGN KEY (dialog_id) REFERENCES dialogs(id) ON DELETE CASCADE
+    FOREIGN KEY (dialog_id) REFERENCES dialogs(id) ON DELETE CASCADE,
+    FOREIGN KEY (reply_message_id) REFERENCES messages(id)
 );
 
 CREATE TABLE IF NOT EXISTS dialog_user_state (

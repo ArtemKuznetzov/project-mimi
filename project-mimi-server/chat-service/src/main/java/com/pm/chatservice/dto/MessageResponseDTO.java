@@ -12,6 +12,7 @@ public record MessageResponseDTO(
         @NotNull Instant createdAt,
         Boolean isDeleted,
         Boolean isEdited,
+        MessageResponseDTO replyMessage,
 
         @NotBlank String userName,
         @NotNull Long userId,

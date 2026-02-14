@@ -4,7 +4,7 @@ import type { MessageCreatePayload } from "@/shared/lib/websoket/types";
 import { Button, Input } from "@/shared/ui";
 
 type MessageInputProps = {
-  onSend: (payload: MessageCreatePayload) => boolean;
+  onSend: (payload: MessageCreatePayload) => void;
 };
 
 export const MessageInput = ({ onSend }: MessageInputProps) => {

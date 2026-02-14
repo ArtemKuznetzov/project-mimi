@@ -114,6 +114,7 @@ export interface components {
             createdAt: string;
             isDeleted?: boolean;
             isEdited?: boolean;
+            replyMessage?: components["schemas"]["MessageResponseDTO"];
             userName: string;
             /** Format: int64 */
             userId: number;

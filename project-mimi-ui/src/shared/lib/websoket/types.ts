@@ -1,6 +1,7 @@
 export type MessageCreatePayload = {
     body: string;
     clientId?: string;
+    replyMessageId?: number;
 };
 
 export type ReadReceiptEvent = {

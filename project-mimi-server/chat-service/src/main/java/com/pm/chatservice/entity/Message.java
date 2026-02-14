@@ -29,6 +29,9 @@ public class Message {
     @Column(nullable = false)
     private String body;
 
+    @Column(name = "reply_message_id")
+    private Long replyMessageId;
+
     @Column(name = "created_at")
     private Instant createdAt;
 
