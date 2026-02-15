@@ -60,7 +60,7 @@ public class ChatSocketController {
         }
     }
 
-    @MessageMapping("/dialogs/{dialogId}/update/{messageId}")
+    @MessageMapping("/dialogs/{dialogId}/edit/{messageId}")
     public void updateMessage(
             @DestinationVariable Long dialogId,
             @DestinationVariable Long messageId,
@@ -71,7 +71,7 @@ public class ChatSocketController {
         MessageResponseDTO updatedMessage = messageService.updateMessage(dialogId, messageId, userId, dto);
 
         if (updatedMessage != null) {
-            messagingTemplate.convertAndSend("/topic/dialogs/" + dialogId + "/update", updatedMessage);
+            messagingTemplate.convertAndSend("/topic/dialogs/" + dialogId + "/edit", updatedMessage);
         }
     }
 }

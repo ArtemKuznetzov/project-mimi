@@ -31,7 +31,7 @@ public class MessageService {
     private final DialogParticipantRepository dialogParticipantRepository;
 
     public List<MessageResponseDTO> getMessagesByDialogId(Long dialogId) {
-        List<Message> messageList = messageRepository.findByDialog_Id(dialogId);
+        List<Message> messageList = messageRepository.findByDialog_IdOrderByCreatedAtAsc(dialogId);
 
         Set<Long> authorIds = messageList.stream()
                 .map(Message::getAuthorId)

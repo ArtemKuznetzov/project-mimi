@@ -90,13 +90,13 @@ export const useChatWebsoket = ({ dialogId, onMessage, onReadReceipt }: UseWebso
         });
 
       updateSubscriptionRef.current?.unsubscribe();
-      updateSubscriptionRef.current = client.subscribe(`/topic/dialogs/${dialogId}/update`, (frame: IMessage) => {
+      updateSubscriptionRef.current = client.subscribe(`/topic/dialogs/${dialogId}/edit`, (frame: IMessage) => {
         if (!frame.body) {
           return;
         }
         try {
           const payload = JSON.parse(frame.body) as MessageResponseDTO;
-          onMessageRef.current?.(payload, "update");
+          onMessageRef.current?.(payload, "edit");
         } catch {
           // ignore invalid payloads
         }
@@ -157,7 +157,7 @@ export const useChatWebsoket = ({ dialogId, onMessage, onReadReceipt }: UseWebso
         return false;
       }
       client.publish({
-        destination: `/app/dialogs/${dialogId}/update/${messageId}`,
+        destination: `/app/dialogs/${dialogId}/edit/${messageId}`,
         body: JSON.stringify({ body }),
       });
       return true;

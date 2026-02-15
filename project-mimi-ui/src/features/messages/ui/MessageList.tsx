@@ -6,7 +6,8 @@ import { cn } from "@/lib/utils";
 import { MessageBubble } from "@/features/messages/ui/MessageBubble";
 import type { MessageStatus, UiMessage } from "@/entities/message/model/types";
 import {MessageActions} from "@/features/messages/ui/MessageActions";
-import {MessageReplyBlock} from "@/features/messages/ui/MessageReplyBlock";
+import {SelectedMessageBlock} from "@/features/messages/ui/SelectedMessageBlock";
+import type {MessageAction} from "@/shared/lib/websoket/types";
 
 const dialogScrollPositions = new Map<number, number>();
 const REPLY_BLOCK_HEIGHT = 44;
@@ -32,10 +33,9 @@ export type MessageListProps = {
   messageActions: {
     onReadCandidate: (messageId: number) => void;
     onDeleteMessage: (messageId: number) => void;
-    onEditMessage: (message: UiMessage) => void;
-    onReplyMessage: (message: UiMessage) => void;
+    onSelectMessage: (message: UiMessage, action: MessageAction) => void;
   }
-  replyMessage?: UiMessage;
+  selectedMessage?: UiMessage;
   onCloseReply: () => void;
 };
 
@@ -45,7 +45,7 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(
     dialogId,
     otherLastReadMessageId,
     messageActions,
-    replyMessage,
+    selectedMessage,
     onCloseReply,
   }: MessageListProps, ref) => {
     const currentUserId = useAppSelector((state) => state.auth.userId);
@@ -57,7 +57,7 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(
     const maxReportedRef = useRef(0);
     const [menuState, setMenuState] = useState<MenuState | null>(null);
 
-    const {onReplyMessage, onEditMessage, onDeleteMessage, onReadCandidate} = messageActions
+    const {onSelectMessage, onReadCandidate, onDeleteMessage} = messageActions
 
     const handleContextMenu = useCallback(
       (event: ReactMouseEvent<HTMLDivElement>, message: UiMessage, isMine: boolean) => {
@@ -136,11 +136,11 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(
 
       if (list) {
         const wasNearBottom = list.scrollHeight - list.scrollTop - list.clientHeight < REPLY_BLOCK_HEIGHT * 2;
-        if (replyMessage && wasNearBottom) {
+        if (selectedMessage && wasNearBottom) {
           requestAnimationFrame(() => scrollToBottom("auto"));
         }
       }
-    }, [replyMessage]);
+    }, [selectedMessage]);
 
     // Reset msg counter
     useEffect(() => {
@@ -234,7 +234,7 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(
           onScroll={handleScroll}
           className={cn(
             "scrollbar max-h-[60vh] overflow-y-auto space-y-4 p-4 pr-2",
-            Boolean(replyMessage) && "pb-20",
+            Boolean(selectedMessage) && "pb-20",
           )}
         >
           {messages.map((message: UiMessage) => {
@@ -275,16 +275,14 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(
               canDelete={menuState.canDelete}
               onClose={() => setMenuState(null)}
               onDelete={() => onDeleteMessage(menuState.message.id)}
-              onEdit={() => onEditMessage(menuState.message)}
-              onReply={() => onReplyMessage(menuState.message)}
+              onEdit={() => onSelectMessage(menuState.message, "edit")}
+              onReply={() => onSelectMessage(menuState.message, "reply")}
             />
           ) : null}
         </ul>
-        {replyMessage ? (
-          <div className="absolute bottom-0 left-0 right-0 px-4 pb-3">
-            <MessageReplyBlock message={replyMessage} onClose={onCloseReply} />
-          </div>
-        ) : null}
+        <div className="absolute bottom-0 left-0 right-0 px-4 pb-3">
+          <SelectedMessageBlock message={selectedMessage} onClose={onCloseReply} />
+        </div>
       </div>
     );
   },

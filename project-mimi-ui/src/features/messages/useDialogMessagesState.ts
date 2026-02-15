@@ -28,7 +28,7 @@ export const useDialogMessagesState = ({
   listHandleRef,
   onReadReceipt,
 }: UseDialogMessagesStateOptions): UseDialogMessagesStateResult => {
-  const [liveMessagesByDialog, setLiveMessagesByDialog] = useState<Record<number, MessageResponseDTO[]>>({});
+  const [liveMessagesByDialog, setLiveMessagesByDialog] = useState<Record<number, UiMessage[]>>({});
   const [localMessagesByDialog, setLocalMessagesByDialog] = useState<Record<number, UiMessage[]>>({});
 
   const pendingScrollRef = useRef<string | null>(null);
@@ -39,7 +39,7 @@ export const useDialogMessagesState = ({
         const current = prev[dialogId] ?? [];
         const existsInLive = current.some((item) => item.id === message.id);
         const existsInInitial = messagesData.some((item) => item.id === message.id);
-        if (action === "update" || action === "delete") {
+        if (action !== "send") {
           if (existsInLive) {
             return {
               ...prev,
@@ -151,26 +151,28 @@ export const useDialogMessagesState = ({
   const messages = useMemo(() => {
     const liveMessages = liveMessagesByDialog[dialogId] ?? [];
     const localMessages = localMessagesByDialog[dialogId] ?? [];
-    if (liveMessages.length === 0) {
-      return [...messagesData, ...localMessages] as UiMessage[];
+
+    const messageMap = new Map<number, UiMessage>();
+    for (const msg of messagesData as UiMessage[]) {
+      messageMap.set(msg.id, msg);
     }
-    const merged = [...messagesData] as UiMessage[];
-    for (const message of liveMessages) {
-      const exists = merged.some((item) => item.id === message.id);
-      if (!exists) {
-        merged.push(message);
-      }
+    for (const msg of liveMessages) {
+      messageMap.set(msg.id, msg);
     }
+
+    const merged = Array.from(messageMap.values());
+
     const serverClientIds = new Set<string>();
-    for (const message of merged) {
-      if (message.clientId) {
-        serverClientIds.add(message.clientId);
-      }
+    for (const msg of merged) {
+      if (msg.clientId) serverClientIds.add(msg.clientId);
     }
     const filteredLocal = localMessages.filter(
-      (message) => !message.clientId || !serverClientIds.has(message.clientId),
+      (msg) => !msg.clientId || !serverClientIds.has(msg.clientId)
     );
-    return [...merged, ...filteredLocal] as UiMessage[];
+
+    return [...merged, ...filteredLocal].sort(
+      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
   }, [dialogId, liveMessagesByDialog, localMessagesByDialog, messagesData]);
 
   useLayoutEffect(() => {

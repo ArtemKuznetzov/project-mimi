@@ -4,11 +4,11 @@ import type {UiMessage} from "@/entities/message";
 import {cn} from "@/lib/utils";
 
 interface MessageReplyBlockProps extends ComponentPropsWithoutRef<"div"> {
-  message: UiMessage
+  message?: UiMessage
   onClose: () => void;
 }
 
-export const MessageReplyBlock = ({message, onClose, className, ...props}: MessageReplyBlockProps) => {
+export const SelectedMessageBlock = ({message, onClose, className, ...props}: MessageReplyBlockProps) => {
   if (message) {
     return (
       <div
@@ -25,7 +25,7 @@ export const MessageReplyBlock = ({message, onClose, className, ...props}: Messa
           <div className="flex-1 min-w-0">
             <div className="flex items-baseline gap-2">
               <span className="text-sm font-medium text-blue-600 dark:text-blue-400 flex-shrink-0">
-                {message.userName}:
+                {message.action === "reply" ? message.userName : "Edit"}:
               </span>
               <p className="text-sm text-gray-600 dark:text-gray-300 truncate">
                 {message.body}

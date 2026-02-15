@@ -11,4 +11,4 @@ export type ReadReceiptEvent = {
     readAt?: string | null;
 };
 
-export type MessageAction = "send" | "update" | "delete";
+export type MessageAction = "send" | "edit" | "delete" | "reply";

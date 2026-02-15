@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long> {
-    List<Message> findByDialog_Id(Long dialogId);
+    List<Message> findByDialog_IdOrderByCreatedAtAsc(Long dialogId);
     Optional<Message> findByIdAndDialog_Id(Long messageId, Long dialogId);
     Optional<Message> findTopByDialog_IdAndIsDeletedFalseOrderByCreatedAtDesc(Long id);
 

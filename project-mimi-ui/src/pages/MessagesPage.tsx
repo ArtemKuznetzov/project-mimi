@@ -1,4 +1,4 @@
-import {useMemo, useRef, useState} from "react";
+import { useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useGetDialogByIdQuery } from "@/features/dialogs/api/dialogsApi";
 import { useGetMessagesQuery } from "@/features/messages/api/messagesApi";
@@ -19,14 +19,14 @@ export const MessagesPage = () => {
   const { data: messagesData = [] } = useGetMessagesQuery(dialogIdInt);
   const currentUserId = useAppSelector((state) => state.auth.userId);
   const listHandleRef = useRef<MessageListHandle | null>(null);
-  const [messageForReply, setMessageForReply] = useState<UiMessage | undefined>(undefined);
+  const [selectedMessage, setSelectedMessage] = useState<UiMessage | undefined>(undefined);
 
   const { otherLastReadMessageId, onReadCandidate, onReadReceipt } = useDialogReadState({
     dialogId: dialogIdInt,
     currentUserId,
   });
 
-  const { messages, onSendMessage, onDeleteMessage } = useDialogMessagesState({
+  const { messages, onSendMessage, onDeleteMessage, onEditMessage } = useDialogMessagesState({
     dialogId: dialogIdInt,
     messagesData,
     currentUserId,
@@ -35,19 +35,22 @@ export const MessagesPage = () => {
   });
 
   const onCloseReplyBlock = () => {
-    setMessageForReply(undefined)
+    setSelectedMessage(undefined)
   }
 
   const handleSendMessage = (payload: MessageCreatePayload) => {
-    onSendMessage(payload, messageForReply)
+    onSendMessage(payload, selectedMessage)
     onCloseReplyBlock()
+  }
+
+  const handleEditMessage = (messageId: number, body: string) => {
+    onEditMessage(messageId, body)
   }
 
   const messageActions: MessageListProps['messageActions'] = useMemo(() => ({
     onReadCandidate,
     onDeleteMessage,
-    onReplyMessage: (message) => setMessageForReply(message),
-    onEditMessage: () => {}
+    onSelectMessage: (message, action) => setSelectedMessage({...message, action})
   }), [onDeleteMessage, onReadCandidate])
 
   return (
@@ -58,13 +61,18 @@ export const MessagesPage = () => {
         dialogId={dialogIdInt}
         otherLastReadMessageId={otherLastReadMessageId}
         messageActions={messageActions}
-        replyMessage={messageForReply}
+        selectedMessage={selectedMessage}
         onCloseReply={onCloseReplyBlock}
         ref={listHandleRef}
       />
 
       <div className="relative">
-        <MessageInput onSend={handleSendMessage} />
+        <MessageInput
+          onSend={handleSendMessage}
+          onEdit={handleEditMessage}
+          selectedMessage={selectedMessage}
+          onCancelEdit={onCloseReplyBlock}
+        />
       </div>
     </div>
   );
