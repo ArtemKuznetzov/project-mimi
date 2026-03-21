@@ -8,3 +8,5 @@ export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
 export { Toast } from "./Toast";
 export { UserAvatar } from "./UserAvatar/UserAvatar";
 export { Skeleton } from "./Skeleton/Skeleton";
+export { BaseModal, ConfirmModal, ImageUploadModal } from "./Modal";
+export type { BaseModalProps, ConfirmModalProps } from "./Modal";

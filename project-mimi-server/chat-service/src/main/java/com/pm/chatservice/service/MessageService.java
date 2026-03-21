@@ -1,13 +1,16 @@
 package com.pm.chatservice.service;
 
 import com.pm.chatservice.authclient.model.UserPublicDTO;
-import com.pm.chatservice.client.AuthUserClient;
+import com.pm.chatservice.client.AuthServiceClient;
+import com.pm.chatservice.client.MediaServiceClient;
 import com.pm.chatservice.dto.MessageCreateDTO;
 import com.pm.chatservice.dto.MessageResponseDTO;
 import com.pm.chatservice.dto.MessageUpdateDTO;
 import com.pm.chatservice.entity.Dialog;
 import com.pm.chatservice.entity.Message;
+import com.pm.chatservice.entity.MessageAttachment;
 import com.pm.chatservice.mapper.MessageMapper;
+import com.pm.chatservice.mediaclient.model.MediaFileInfoDTO;
 import com.pm.chatservice.repository.DialogParticipantRepository;
 import com.pm.chatservice.repository.DialogRepository;
 import com.pm.chatservice.repository.MessageRepository;
@@ -16,16 +19,19 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
 public class MessageService {
     private final MessageRepository messageRepository;
-    private final AuthUserClient authUserClient;
+    private final AuthServiceClient authServiceClient;
+    private final MediaServiceClient mediaServiceClient;
     private final MessageMapper messageMapper;
     private final DialogRepository dialogRepository;
     private final DialogParticipantRepository dialogParticipantRepository;
@@ -38,7 +44,7 @@ public class MessageService {
                 .collect(Collectors.toSet());
 
         Map<Long, UserPublicDTO> dialogUsers = authorIds.stream()
-                .collect(Collectors.toMap(id -> id, authUserClient::getUser));
+                .collect(Collectors.toMap(id -> id, authServiceClient::getUser));
 
         Map<Long, Message> messagesById = messageList.stream()
                 .collect(Collectors.toMap(Message::getId, message -> message));
@@ -62,12 +68,12 @@ public class MessageService {
     }
 
     @Transactional
-    public MessageResponseDTO saveMessage(Long dialogId, Long userId, MessageCreateDTO dto) {
+    public MessageResponseDTO saveMessage(Long dialogId, Long userId, MessageCreateDTO dto, List<MultipartFile> files) {
         Objects.requireNonNull(dialogId, "dialogId must not be null");
         Objects.requireNonNull(userId, "userId must not be null");
         Objects.requireNonNull(dto, "message payload must not be null");
 
-        UserPublicDTO user = authUserClient.getUser(userId);
+        UserPublicDTO user = authServiceClient.getUser(userId);
         Long replyMessageId = dto.replyMessageId();
         MessageResponseDTO replyDto = null;
         if (replyMessageId != null) {
@@ -77,11 +83,30 @@ public class MessageService {
             }
         }
 
+        List<MessageAttachment> attachments = Collections.emptyList();
+        if (files != null && !files.isEmpty()) {
+            List<MediaFileInfoDTO> uploaded = mediaServiceClient.uploadFiles(files);
+            attachments = IntStream.range(0, uploaded.size())
+                    .mapToObj(i -> {
+                        MediaFileInfoDTO info = uploaded.get(i);
+                        return MessageAttachment.builder()
+                                .objectName(info.getObjectName())
+                                .fileName(info.getOriginalName())
+                                .contentType(info.getContentType())
+                                .extension(info.getExtension())
+                                .size(info.getSize().intValue())
+                                .attachmentOrder(i)
+                                .build();
+                    })
+                    .toList();
+        }
+
         Message message = new Message();
         message.setBody(dto.body());
         message.setAuthorId(userId);
         message.setCreatedAt(Instant.now());
         message.setReplyMessageId(replyMessageId);
+        message.setAttachments(attachments);
 
         Dialog dialog = dialogRepository.getReferenceById(dialogId);
         message.setDialog(dialog);
@@ -98,7 +123,7 @@ public class MessageService {
         Objects.requireNonNull(messageId, "messageId must not be null");
         Objects.requireNonNull(userId, "userId must not be null");
 
-        UserPublicDTO user = authUserClient.getUser(userId);
+        UserPublicDTO user = authServiceClient.getUser(userId);
         Message message = getMessageFromDialog(dialogId, messageId, userId);
         Dialog dialog = message.getDialog();
 
@@ -125,7 +150,7 @@ public class MessageService {
         Objects.requireNonNull(userId, "userId must not be null");
         Objects.requireNonNull(dto, "message payload must not be null");
 
-        UserPublicDTO user = authUserClient.getUser(userId);
+        UserPublicDTO user = authServiceClient.getUser(userId);
 
         Message message = getMessageFromDialog(dialogId, messageId, userId);
         if (Boolean.TRUE.equals(message.getIsDeleted())) {
@@ -152,7 +177,7 @@ public class MessageService {
         if (replyMessage == null) {
             return null;
         }
-        UserPublicDTO replyUser = authUserClient.getUser(replyMessage.getAuthorId());
+        UserPublicDTO replyUser = authServiceClient.getUser(replyMessage.getAuthorId());
         return messageMapper.toDto(replyMessage, dialogId, replyUser, null, null);
     }
 

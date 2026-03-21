@@ -5,6 +5,7 @@ import { useChatWebsoket } from "@/shared/lib/websoket/useChatWebsoket";
 import type {MessageAction, MessageCreatePayload, ReadReceiptEvent} from "@/shared/lib/websoket/types";
 import type { UiMessage } from "@/entities/message";
 import type { MessageListHandle } from "@/features/messages/ui/MessageList";
+import {useSendMessageMutation} from "@/features/messages/api/messagesApi";
 
 type UseDialogMessagesStateOptions = {
   dialogId: number;
@@ -16,7 +17,7 @@ type UseDialogMessagesStateOptions = {
 
 type UseDialogMessagesStateResult = {
   messages: UiMessage[];
-  onSendMessage: (payload: MessageCreatePayload, replyMessage?: UiMessage) => boolean;
+  onSendMessage: (payload: MessageCreatePayload, replyMessage?: UiMessage) => Promise<boolean>;
   onDeleteMessage: (messageId: number) => boolean;
   onEditMessage: (messageId: number, body: string) => boolean;
 };
@@ -32,6 +33,8 @@ export const useDialogMessagesState = ({
   const [localMessagesByDialog, setLocalMessagesByDialog] = useState<Record<number, UiMessage[]>>({});
 
   const pendingScrollRef = useRef<string | null>(null);
+
+  const [sendMessage] = useSendMessageMutation()
 
   const handleMessage = useCallback(
     (message: MessageResponseDTO, action: MessageAction) => {
@@ -84,14 +87,14 @@ export const useDialogMessagesState = ({
     [dialogId, messagesData, currentUserId, listHandleRef],
   );
 
-  const { sendMessage, sendUpdateMessage, sendDeleteMessage } = useChatWebsoket({
+  const { sendUpdateMessage, sendDeleteMessage } = useChatWebsoket({
     dialogId,
     onMessage: handleMessage,
     onReadReceipt,
   });
 
   const onSendMessage: UseDialogMessagesStateResult['onSendMessage'] = useCallback(
-    (payload, replyMessage) => {
+    async (payload, replyMessage) => {
       if (!Number.isFinite(dialogId) || currentUserId === null) {
         return false;
       }
@@ -114,18 +117,23 @@ export const useDialogMessagesState = ({
         [dialogId]: [...(prev[dialogId] ?? []), optimisticMessage],
       }));
 
-      const isSent = sendMessage({ ...payload, replyMessageId: replyMessage?.id, clientId });
-      if (!isSent) {
+      try {
+        const saved = await sendMessage({ ...payload, replyMessageId: replyMessage?.id, clientId, dialogId }).unwrap();
+        if (saved) {
+          handleMessage(saved, "send");
+        }
+        return true;
+      } catch {
         setLocalMessagesByDialog((prev) => ({
           ...prev,
           [dialogId]: (prev[dialogId] ?? []).map((message) =>
             message.clientId === clientId ? { ...message, localStatus: "failed" } : message,
           ),
         }));
+        return false;
       }
-      return isSent;
     },
-    [dialogId, currentUserId, sendMessage],
+    [dialogId, currentUserId, sendMessage, handleMessage],
   );
 
   const onDeleteMessage = useCallback(

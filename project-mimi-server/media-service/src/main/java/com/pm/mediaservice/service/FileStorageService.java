@@ -21,10 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URLConnection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.regex.Pattern;
 
 @Slf4j
@@ -88,6 +85,10 @@ public class FileStorageService {
     }
 
     public MediaFileInfoDTO uploadFile(MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "EMPTY_FILE", "File is empty.");
+        }
+
         String originalName = sanitizeFilename(file.getOriginalFilename());
         String extension = normalizeExtension(extractExtension(originalName));
         String objectName = UUID.randomUUID().toString();
@@ -117,6 +118,20 @@ public class FileStorageService {
             throw new ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "UPLOAD_FAILED",
                     "File could not be uploaded. Please try again later.", e);
         }
+    }
+
+    public List<MediaFileInfoDTO> uploadFiles(List<MultipartFile> files) {
+        if (files.isEmpty()) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "EMPTY_FILE", "File is empty.");
+        }
+        return files.stream()
+                .map(file -> {
+                    if (file.isEmpty()) {
+                        throw new ApiException(HttpStatus.BAD_REQUEST, "EMPTY_FILE", "List contains an empty file");
+                    }
+                    return uploadFile(file);
+                })
+                .toList();
     }
 
     public DownloadedFile downloadFile(String objectName) {

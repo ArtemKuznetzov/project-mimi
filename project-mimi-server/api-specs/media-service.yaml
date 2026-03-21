@@ -1,0 +1,108 @@
+openapi: 3.0.3
+info:
+  title: Media Service API
+  version: 1.0.0
+paths:
+  /files/upload:
+    post:
+      operationId: uploadFile
+      summary: Upload a single file
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaFileInfoDTO"
+      security:
+        - bearerAuth: []
+  /files/upload-multi:
+    post:
+      operationId: uploadFiles
+      summary: Upload multiple files
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - files
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MediaFileInfoDTO"
+      security:
+        - bearerAuth: []
+  /files/metadata/{objectName}:
+    get:
+      operationId: getFileMetadata
+      summary: Get file metadata
+      parameters:
+        - name: objectName
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaFileInfoDTO"
+        "404":
+          description: Not Found
+      security:
+        - bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    MediaFileInfoDTO:
+      type: object
+      required:
+        - objectName
+        - contentType
+        - size
+      properties:
+        objectName:
+          type: string
+        originalName:
+          type: string
+          nullable: true
+        extension:
+          type: string
+          nullable: true
+        contentType:
+          type: string
+        size:
+          type: integer
+          format: int64
+          minimum: 0

@@ -38,9 +38,11 @@ export const MessagesPage = () => {
     setSelectedMessage(undefined)
   }
 
-  const handleSendMessage = (payload: MessageCreatePayload) => {
-    onSendMessage(payload, selectedMessage)
-    onCloseReplyBlock()
+  const handleSendMessage = async (payload: MessageCreatePayload) => {
+    const ok = await onSendMessage(payload, selectedMessage)
+    if (ok) {
+      onCloseReplyBlock()
+    }
   }
 
   const handleEditMessage = (messageId: number, body: string) => {

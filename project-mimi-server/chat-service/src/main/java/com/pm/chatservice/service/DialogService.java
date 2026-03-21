@@ -1,6 +1,6 @@
 package com.pm.chatservice.service;
 
-import com.pm.chatservice.client.AuthUserClient;
+import com.pm.chatservice.client.AuthServiceClient;
 import com.pm.chatservice.authclient.model.UserPublicDTO;
 import com.pm.chatservice.dto.DialogDataDTO;
 import com.pm.chatservice.dto.DialogResponseDTO;
@@ -19,7 +19,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class DialogService {
     private final DialogRepository dialogRepository;
-    private final AuthUserClient authUserClient;
+    private final AuthServiceClient authServiceClient;
     private final RequestUserContext requestUserContext;
 
     @Transactional(readOnly = true)
@@ -55,7 +55,7 @@ public class DialogService {
         if (dialogData.isPrivate()) {
             Long otherUserId = dialogData.getOtherUserIdAsLong();
             UserPublicDTO otherUser = Optional.ofNullable(otherUserId)
-                    .map(authUserClient::getUser)
+                    .map(authServiceClient::getUser)
                     .orElse(null);
 
             userId = otherUserId;

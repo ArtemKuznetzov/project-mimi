@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "messages")
@@ -31,6 +33,14 @@ public class Message {
 
     @Column(name = "reply_message_id")
     private Long replyMessageId;
+
+    @ElementCollection
+    @CollectionTable(
+            name = "message_attachments",
+            joinColumns = @JoinColumn(name = "message_id")
+    )
+    @OrderColumn(name = "attachment_order")
+    private List<MessageAttachment> attachments = new ArrayList<>();
 
     @Column(name = "created_at")
     private Instant createdAt;

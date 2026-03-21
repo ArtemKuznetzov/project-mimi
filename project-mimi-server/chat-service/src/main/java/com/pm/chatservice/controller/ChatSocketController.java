@@ -23,17 +23,6 @@ public class ChatSocketController {
     private final MessageService messageService;
     private final DialogService dialogService;
 
-    @MessageMapping("/dialogs/{dialogId}/send")
-    public void sendMessage(@DestinationVariable Long dialogId, MessageCreateDTO dto, Principal principal) {
-        Long userId = getUserIdInDialog(dialogId, principal);
-        MessageResponseDTO saved = messageService.saveMessage(dialogId, userId, dto);
-
-        if (saved != null) {
-            messagingTemplate.convertAndSend("/topic/dialogs/" + dialogId, saved);
-            log.debug("Message sent to dialog {} by user {}", dialogId, userId);
-        }
-    }
-
     private Long getUserIdInDialog(Long dialogId, Principal principal) {
         if (principal == null) {
             log.warn("Unauthorized attempt to send message to dialog {}", dialogId);

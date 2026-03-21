@@ -128,9 +128,39 @@
                         </goals>
                         <configuration>
                             <inputSpec>${project.basedir}/../api-specs/auth-service.yaml</inputSpec>
+                            <output>${project.build.directory}/generated-sources/openapi-auth</output>
                             <generatorName>java</generatorName>
                             <library>resttemplate</library>
                             <modelPackage>com.pm.chatservice.authclient.model</modelPackage>
+                            <generateApis>false</generateApis>
+                            <generateModels>true</generateModels>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <generateApiTests>false</generateApiTests>
+                            <generateModelTests>false</generateModelTests>
+                            <generateApiDocumentation>false</generateApiDocumentation>
+                            <generateModelDocumentation>false</generateModelDocumentation>
+                            <addCompileSourceRoot>true</addCompileSourceRoot>
+                            <cleanupOutput>true</cleanupOutput>
+                            <configOptions>
+                                <useJakartaEe>true</useJakartaEe>
+                                <generatedAnnotation>false</generatedAnnotation>
+                                <serializationLibrary>jackson</serializationLibrary>
+                                <openApiNullable>false</openApiNullable>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-media-models</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <inputSpec>${project.basedir}/../api-specs/media-service.yaml</inputSpec>
+                            <output>${project.build.directory}/generated-sources/openapi-media</output>
+                            <generatorName>java</generatorName>
+                            <library>resttemplate</library>
+                            <modelPackage>com.pm.chatservice.mediaclient.model</modelPackage>
                             <generateApis>false</generateApis>
                             <generateModels>true</generateModels>
                             <generateSupportingFiles>false</generateSupportingFiles>

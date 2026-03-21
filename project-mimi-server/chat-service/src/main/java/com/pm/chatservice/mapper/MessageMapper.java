@@ -1,8 +1,10 @@
 package com.pm.chatservice.mapper;
 
 import com.pm.chatservice.authclient.model.UserPublicDTO;
+import com.pm.chatservice.dto.AttachmentResponseDTO;
 import com.pm.chatservice.dto.MessageResponseDTO;
 import com.pm.chatservice.entity.Message;
+import com.pm.chatservice.entity.MessageAttachment;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -19,5 +21,8 @@ public interface MessageMapper {
     @Mapping(target = "userAvatarId", source = "user.avatarId")
     @Mapping(target = "clientId", source = "clientId")
     @Mapping(target = "replyMessage", source = "replyMessage")
+    @Mapping(target = "attachments", source = "message.attachments")
     MessageResponseDTO toDto(Message message, Long dialogId, UserPublicDTO user, String clientId, MessageResponseDTO replyMessage);
+
+    AttachmentResponseDTO toAttachmentDto(MessageAttachment a);
 }

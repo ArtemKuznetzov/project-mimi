@@ -13,15 +13,15 @@ import org.springframework.web.client.RestClient;
 import java.util.Objects;
 
 @Service
-public class AuthUserClient {
+public class AuthServiceClient {
     private final RestClient restClient;
     private final RequestUserContext requestUserContext;
 
-    public AuthUserClient(RestClient.Builder restClientBuilder,
-                          @Value("${auth.service.url}") String authServiceUrl,
-                          RequestUserContext requestUserContext) {
+    public AuthServiceClient(RestClient.Builder restClientBuilder,
+                             @Value("${auth.service.url}") String authServiceUrl,
+                             RequestUserContext requestUserContext) {
         this.restClient = restClientBuilder
-                .baseUrl(Objects.requireNonNull(authServiceUrl, "authServiceUrl is null"))
+                .baseUrl(authServiceUrl)
                 .build();
         this.requestUserContext = requestUserContext;
     }

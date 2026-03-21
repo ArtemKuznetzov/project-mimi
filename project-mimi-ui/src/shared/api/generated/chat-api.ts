@@ -4,6 +4,22 @@
  */
 
 export interface paths {
+    "/messages/{dialogId}/message/send": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["sendMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/dialogs/{dialogId}/read": {
         parameters: {
             query?: never;
@@ -104,6 +120,14 @@ export interface components {
             /** Format: int64 */
             otherLastReadMessageId?: number;
         };
+        AttachmentResponseDTO: {
+            objectName?: string;
+            fileName?: string;
+            contentType?: string;
+            extension?: string;
+            /** Format: int32 */
+            size?: number;
+        };
         MessageResponseDTO: {
             /** Format: int64 */
             id: number;
@@ -115,6 +139,7 @@ export interface components {
             isDeleted?: boolean;
             isEdited?: boolean;
             replyMessage?: components["schemas"]["MessageResponseDTO"];
+            attachments?: components["schemas"]["AttachmentResponseDTO"][];
             userName: string;
             /** Format: int64 */
             userId: number;
@@ -143,6 +168,36 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    sendMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dialogId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    body?: string;
+                    /** Format: int64 */
+                    replyMessageId?: number;
+                    clientId?: string;
+                    files?: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     markDialogRead: {
         parameters: {
             query?: never;

@@ -3,6 +3,7 @@ import { useAppSelector } from "@/app/hooks";
 import type { UiMessage } from "@/entities/message";
 import type { MessageCreatePayload } from "@/shared/lib/websoket/types";
 import { Button, Input } from "@/shared/ui";
+import { ImageUploadModal } from "@/shared/ui/Modal";
 
 type MessageInputProps = {
   onSend: (payload: MessageCreatePayload) => void;
@@ -13,11 +14,14 @@ type MessageInputProps = {
 
 export const MessageInput = ({ onSend, onEdit, selectedMessage, onCancelEdit }: MessageInputProps) => {
   const [value, setValue] = useState("");
+  const [files, setFiles] = useState<File[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const userId = useAppSelector((state) => state.auth.userId);
   const trimmedValue = value.trim();
   const isEditing = selectedMessage?.action === "edit";
-  const canSubmit = Boolean(userId) && trimmedValue.length > 0;
+  const canSubmit = Boolean(userId) && (trimmedValue.length > 0 || files.length > 0);
+
+  console.log(files)
 
   useEffect(() => {
     if (isEditing && selectedMessage) {
@@ -36,7 +40,8 @@ export const MessageInput = ({ onSend, onEdit, selectedMessage, onCancelEdit }: 
       onEdit(selectedMessage.id, trimmedValue);
       onCancelEdit();
     } else {
-      onSend({ body: trimmedValue });
+      onSend({ body: trimmedValue, files });
+      setFiles([])
     }
     setValue("");
   };
@@ -53,6 +58,10 @@ export const MessageInput = ({ onSend, onEdit, selectedMessage, onCancelEdit }: 
     setValue("");
   }
 
+  const handleFileUpload = (files: File[]) => {
+    setFiles(files);
+  };
+
   return (
     <form onSubmit={handleSubmit} className="flex items-center gap-2">
       <Input
@@ -61,6 +70,7 @@ export const MessageInput = ({ onSend, onEdit, selectedMessage, onCancelEdit }: 
         value={value}
         onChange={(event) => setValue(event.target.value)}
         onKeyDown={handleKeyDown}
+        onFileUpload={handleFileUpload}
       />
       {isEditing && (
         <Button type="button" variant="outline" onClick={onCancelButtonClick}>
@@ -70,6 +80,7 @@ export const MessageInput = ({ onSend, onEdit, selectedMessage, onCancelEdit }: 
       <Button type="submit" disabled={!canSubmit}>
         {isEditing ? "Save" : "Send"}
       </Button>
+      <ImageUploadModal files={files} inputValue={value} onSaveInputValue={(inputValue: string) => setValue(inputValue)} onClose={() => setFiles([])} />
     </form>
   );
 };

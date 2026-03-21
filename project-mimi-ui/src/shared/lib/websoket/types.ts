@@ -1,7 +1,9 @@
 export type MessageCreatePayload = {
     body: string;
+    dialogId?: number;
     clientId?: string;
     replyMessageId?: number;
+    files?: File[];
 };
 
 export type ReadReceiptEvent = {

@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -41,12 +42,14 @@ public class FileController {
     )
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<MediaFileInfoDTO> uploadFile(@RequestPart("file") MultipartFile file) {
-        if (file.isEmpty()) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "EMPTY_FILE", "File is empty.");
-        }
-
         MediaFileInfoDTO fileInfo = fileStorageService.uploadFile(file);
         return ResponseEntity.ok(fileInfo);
+    }
+
+    @PostMapping(value="/upload-multi", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<List<MediaFileInfoDTO>> uploadFiles(@RequestPart("files") List<MultipartFile> files) {
+        List<MediaFileInfoDTO> filesInfo = fileStorageService.uploadFiles(files);
+        return ResponseEntity.ok(filesInfo);
     }
 
     @GetMapping("/download/{objectName}")
