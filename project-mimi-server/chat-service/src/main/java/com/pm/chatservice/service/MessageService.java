@@ -73,6 +73,23 @@ public class MessageService {
         Objects.requireNonNull(userId, "userId must not be null");
         Objects.requireNonNull(dto, "message payload must not be null");
 
+        String body = dto.body();
+        boolean hasText = body != null && !body.trim().isEmpty();
+        List<MultipartFile> nonEmptyFiles = files == null
+                ? Collections.emptyList()
+                : files.stream()
+                .filter(Objects::nonNull)
+                .filter(file -> !file.isEmpty())
+                .toList();
+        boolean hasAttachments = !nonEmptyFiles.isEmpty();
+        if (!hasText && !hasAttachments) {
+            throw new ApiException(
+                    HttpStatus.BAD_REQUEST,
+                    "MESSAGE_EMPTY",
+                    "Message must contain text or at least one attachment"
+            );
+        }
+
         UserPublicDTO user = authServiceClient.getUser(userId);
         Long replyMessageId = dto.replyMessageId();
         MessageResponseDTO replyDto = null;
@@ -84,8 +101,8 @@ public class MessageService {
         }
 
         List<MessageAttachment> attachments = Collections.emptyList();
-        if (files != null && !files.isEmpty()) {
-            List<MediaFileInfoDTO> uploaded = mediaServiceClient.uploadFiles(files);
+        if (hasAttachments) {
+            List<MediaFileInfoDTO> uploaded = mediaServiceClient.uploadFiles(nonEmptyFiles);
             attachments = IntStream.range(0, uploaded.size())
                     .mapToObj(i -> {
                         MediaFileInfoDTO info = uploaded.get(i);
@@ -102,7 +119,7 @@ public class MessageService {
         }
 
         Message message = new Message();
-        message.setBody(dto.body());
+        message.setBody(hasText ? body : "");
         message.setAuthorId(userId);
         message.setCreatedAt(Instant.now());
         message.setReplyMessageId(replyMessageId);

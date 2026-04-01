@@ -21,7 +21,7 @@ export const MessageInput = ({ onSend, onEdit, selectedMessage, onCancelEdit }: 
   const isEditing = selectedMessage?.action === "edit";
   const canSubmit = Boolean(userId) && (trimmedValue.length > 0 || files.length > 0);
 
-  console.log(files)
+  console.log(files);
 
   useEffect(() => {
     if (isEditing && selectedMessage) {
@@ -41,7 +41,7 @@ export const MessageInput = ({ onSend, onEdit, selectedMessage, onCancelEdit }: 
       onCancelEdit();
     } else {
       onSend({ body: trimmedValue, files });
-      setFiles([])
+      setFiles([]);
     }
     setValue("");
   };
@@ -56,7 +56,7 @@ export const MessageInput = ({ onSend, onEdit, selectedMessage, onCancelEdit }: 
   const onCancelButtonClick = () => {
     onCancelEdit();
     setValue("");
-  }
+  };
 
   const handleFileUpload = (files: File[]) => {
     setFiles(files);
@@ -80,7 +80,12 @@ export const MessageInput = ({ onSend, onEdit, selectedMessage, onCancelEdit }: 
       <Button type="submit" disabled={!canSubmit}>
         {isEditing ? "Save" : "Send"}
       </Button>
-      <ImageUploadModal files={files} inputValue={value} onSaveInputValue={(inputValue: string) => setValue(inputValue)} onClose={() => setFiles([])} />
+      <ImageUploadModal
+        files={files}
+        inputValue={value}
+        onSaveInputValue={(inputValue: string) => setValue(inputValue)}
+        onClose={() => setFiles([])}
+      />
     </form>
   );
 };

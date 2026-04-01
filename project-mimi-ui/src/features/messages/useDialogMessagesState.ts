@@ -4,7 +4,7 @@ import type { MessageResponseDTO } from "@/shared/api/generated";
 import { useChatWebsoket } from "@/shared/lib/websoket/useChatWebsoket";
 import type {MessageAction, MessageCreatePayload, ReadReceiptEvent} from "@/shared/lib/websoket/types";
 import type { UiMessage } from "@/entities/message";
-import type { MessageListHandle } from "@/features/messages/ui/MessageList";
+import type { MessageListHandle } from "@/features/messages/ui";
 import {useSendMessageMutation} from "@/features/messages/api/messagesApi";
 
 type UseDialogMessagesStateOptions = {

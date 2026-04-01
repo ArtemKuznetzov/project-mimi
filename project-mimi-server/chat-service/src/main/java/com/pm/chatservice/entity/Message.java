@@ -28,7 +28,6 @@ public class Message {
     @Column(name = "author_id", nullable = false)
     private Long authorId;
 
-    @Column(nullable = false)
     private String body;
 
     @Column(name = "reply_message_id")
