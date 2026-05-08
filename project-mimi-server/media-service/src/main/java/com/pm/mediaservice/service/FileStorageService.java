@@ -21,6 +21,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.net.URLConnection;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -124,14 +127,25 @@ public class FileStorageService {
         if (files.isEmpty()) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "EMPTY_FILE", "File is empty.");
         }
-        return files.stream()
-                .map(file -> {
-                    if (file.isEmpty()) {
-                        throw new ApiException(HttpStatus.BAD_REQUEST, "EMPTY_FILE", "List contains an empty file");
-                    }
-                    return uploadFile(file);
-                })
-                .toList();
+        files.forEach(file -> {
+            if (file.isEmpty()) {
+                throw new ApiException(HttpStatus.BAD_REQUEST, "EMPTY_FILE", "List contains an empty file");
+            }
+        });
+
+        int threadCount = Math.min(files.size(), Runtime.getRuntime().availableProcessors());
+        if (threadCount <= 1) {
+            return files.stream().map(this::uploadFile).toList();
+        }
+
+        try (ExecutorService executor = Executors.newFixedThreadPool(threadCount)) {
+            List<CompletableFuture<MediaFileInfoDTO>> uploadTasks = files.stream()
+                    .map(file -> CompletableFuture.supplyAsync(() -> uploadFile(file), executor))
+                    .toList();
+
+            CompletableFuture.allOf(uploadTasks.toArray(CompletableFuture[]::new)).join();
+            return uploadTasks.stream().map(CompletableFuture::join).toList();
+        }
     }
 
     public DownloadedFile downloadFile(String objectName) {
