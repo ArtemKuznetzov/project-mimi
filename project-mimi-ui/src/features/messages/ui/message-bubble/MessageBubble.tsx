@@ -33,6 +33,20 @@ export const MessageBubble = ({ message, isMine, status, className }: MessageBub
 
   const statusIcon = getStatusIcon(status, isMine, isDeleted);
 
+  const metaRow = (
+    <div className={cn("flex items-center gap-1 text-[10px] leading-none")}>
+      <span className="whitespace-nowrap">
+        {formatMessageTime(createdAt)}
+        {!isDeleted && isEdited ? " • edited" : ""}
+      </span>
+      {statusIcon ? (
+        <span className="inline-flex items-center" title={status ? statusLabels[status] : undefined}>
+          {statusIcon}
+        </span>
+      ) : null}
+    </div>
+  );
+
   return (
     <div className={cn("flex min-w-0 max-w-full flex-col gap-1", isMine ? "items-end" : "items-start", className)}>
       {attachmentOnly ? (
@@ -45,6 +59,24 @@ export const MessageBubble = ({ message, isMine, status, className }: MessageBub
             isMine={isMine}
           />
         </div>
+      ) : textAndAttachments ? (
+        <div className={cn(bubbleShell(isMine, isDeleted), "overflow-hidden p-0")}>
+          {replyMessage && !isDeleted ? (
+            <div className="px-3 pt-2">
+              <ReplyBlock isMine={isMine} isDeleted={isDeleted} replyMessage={replyMessage} />
+            </div>
+          ) : null}
+          <ImagesBlock
+            attachments={attachmentItems}
+            textAndAttachments={textAndAttachments}
+            attachmentOnly={false}
+            isMine={isMine}
+            embeddedInBubble
+          />
+          <div className="px-3 py-2 pt-1.5">
+            <TextBlock text={trimmedBody} isDeleted={isDeleted} />
+          </div>
+        </div>
       ) : (
         <div className={cn("flex w-fit min-w-0 max-w-full flex-col gap-2", isMine ? "items-end" : "items-start")}>
           {(hasText || isDeleted || replyMessage) && (
@@ -54,7 +86,7 @@ export const MessageBubble = ({ message, isMine, status, className }: MessageBub
               {isDeleted && <p className="whitespace-pre-wrap break-words break-all leading-snug">Message deleted</p>}
             </div>
           )}
-          {!isDeleted && (
+          {!isDeleted && hasAttachments && (
             <ImagesBlock
               attachments={attachmentItems}
               textAndAttachments={textAndAttachments}
@@ -64,17 +96,7 @@ export const MessageBubble = ({ message, isMine, status, className }: MessageBub
           )}
         </div>
       )}
-      <div className={cn("flex items-center gap-1 text-[10px] leading-none")}>
-        <span className="whitespace-nowrap">
-          {formatMessageTime(createdAt)}
-          {!isDeleted && isEdited ? " • edited" : ""}
-        </span>
-        {statusIcon ? (
-          <span className="inline-flex items-center" title={status ? statusLabels[status] : undefined}>
-            {statusIcon}
-          </span>
-        ) : null}
-      </div>
+      {metaRow}
     </div>
   );
 };

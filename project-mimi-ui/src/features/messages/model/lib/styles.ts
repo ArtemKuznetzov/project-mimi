@@ -1,26 +1,33 @@
 import { cn } from "@/lib/utils";
+import { chatTokens } from "./chatTokens";
 
 const bubbleShell = (isMine: boolean, isDeleted: boolean) =>
   cn(
     "inline-flex w-fit max-w-full flex-col rounded-2xl px-3 py-2 text-sm shadow-sm",
     isMine
-      ? "bg-blue-500 text-white rounded-br-sm"
-      : "bg-gray-100 text-gray-900 rounded-bl-sm dark:bg-gray-800 dark:text-gray-100",
-    isDeleted ? "bg-gray-200 text-gray-500 italic dark:bg-gray-700 dark:text-gray-300" : null,
+      ? `rounded-br-sm bg-[${chatTokens.messageBubble.light.mine.bg}] text-[${chatTokens.text.primary.light}] dark:bg-[${chatTokens.messageBubble.dark.mine.bg}] dark:text-[${chatTokens.text.primary.dark}]`
+      : "rounded-bl-sm bg-white text-[#111B21] shadow-sm ring-1 ring-black/[0.06] dark:bg-[#1F2C33] dark:text-[#E9EDEF] dark:ring-white/[0.06]",
+    isDeleted
+      ? `bg-[${chatTokens.messageBubble.light.deleted.bg}] text-[${chatTokens.text.deleted.light}] italic ring-0 dark:bg-[${chatTokens.messageBubble.light.deleted.bgDark}] dark:text-[${chatTokens.text.deleted.dark}]`
+      : null,
   );
 
 const replySnippetClass = (isMine: boolean) =>
   cn(
-    "mb-2 w-full rounded-md border-l-2 px-2 py-1 text-[11px] leading-snug",
+    "mb-2 w-full rounded-md border-l-[3px] px-2 py-1 text-[11px] leading-snug",
     isMine
-      ? "border-white/60 bg-white/15 text-white/90"
-      : "border-blue-500/60 bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200",
+      ? `border-[${chatTokens.border.outgoing.light}] bg-[${chatTokens.replyBg.my.light}] text-[${chatTokens.text.secondary.light}] dark:border-[${chatTokens.border.outgoing.dark}] dark:bg-[${chatTokens.replyBg.my.dark}] dark:text-[${chatTokens.text.secondary.dark}]`
+      : `border-[${chatTokens.border.incoming.light}] bg-[${chatTokens.replyBg.your.light}] text-[${chatTokens.text.secondary.light}] dark:border-[${chatTokens.border.incoming.dark}] dark:bg-[${chatTokens.replyBg.your.dark}] dark:text-[${chatTokens.text.secondary.dark}]`,
   );
 
 const attachmentFrameClass = (isMine: boolean) =>
   cn(
-    "max-w-[min(280px,85vw)] overflow-hidden rounded-2xl shadow-md ring-1 ring-black/5 dark:ring-white/10",
-    isMine ? "rounded-br-md" : "rounded-bl-md",
+    "max-w-[min(320px,92vw)] overflow-hidden rounded-2xl shadow-sm",
+    isMine
+      ? `rounded-br-md bg-[${chatTokens.messageBubble.light.mine.bg}] ring-1 ring-[${chatTokens.ring.message.light}] dark:bg-[${chatTokens.messageBubble.dark.mine.bg}] dark:ring-[${chatTokens.ring.message.dark}]`
+      : "rounded-bl-md bg-white ring-1 ring-black/[0.06] dark:bg-[#1F2C33] dark:ring-white/[0.06]",
   );
 
-export {bubbleShell, replySnippetClass, attachmentFrameClass};
+const chatSurfaceClass = () => `bg-[${chatTokens.chatSurface.light}] dark:bg-[${chatTokens.chatSurface.dark}]`;
+
+export { bubbleShell, replySnippetClass, attachmentFrameClass, chatSurfaceClass };

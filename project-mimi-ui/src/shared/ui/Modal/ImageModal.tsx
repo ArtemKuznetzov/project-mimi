@@ -1,7 +1,6 @@
-import {useState, useEffect, useRef } from 'react';
-import { BaseModal } from './BaseModal';
-import { Input } from '@/shared/ui';
-import { Button } from '@/shared/ui';
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { BaseModal } from "./BaseModal";
+import { Button, Input } from "@/shared/ui";
 
 const getGridConfig = (count: number) => {
   switch (count) {
@@ -27,36 +26,56 @@ const getGridConfig = (count: number) => {
   }
 };
 
-type ImageUploadModalProps = {
+export type ImageUploadModalProps = {
   onClose: () => void;
-  onSaveInputValue: (inputValue: string) => void;
+  onSaveModalData: (input: string, files: File[]) => void;
   files: File[];
   inputValue: string;
+  isOpen: boolean;
 };
 
-export const ImageUploadModal = ({ onClose, onSaveInputValue, files: files = [], inputValue }: ImageUploadModalProps) => {
-  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-  const ref = useRef<HTMLInputElement>(null);
-  const isOpen = files.length > 0;
-  const count = previewUrls.length;
-  const gridConfig = getGridConfig(count);
+export const ImageUploadModal = ({ onClose, onSaveModalData, files = [], inputValue, isOpen }: ImageUploadModalProps) => {
+  const [addFiles, setAddFiles] = useState<File[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const allFiles = useMemo(() => {
+    return [...files, ...addFiles];
+  }, [files, addFiles]);
+
+  const previewUrls = useMemo(() => {
+    const imageFiles = allFiles.filter((f) => f.type.startsWith("image/"));
+    return imageFiles.map((f) => URL.createObjectURL(f));
+  }, [allFiles]);
 
   useEffect(() => {
-    if (isOpen) {
-      const urls = files
-        .filter((f) => f.type.startsWith('image/'))
-        .map((f) => URL.createObjectURL(f));
+    return () => {
+      previewUrls.forEach(URL.revokeObjectURL);
+    };
+  }, [previewUrls]);
 
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setPreviewUrls(urls);
-      return () => urls.forEach((url) => URL.revokeObjectURL(url));
-    }
-  }, [files, isOpen]);
+  const onFileUpload = useCallback((newFiles: File[]) => {
+    setAddFiles((prev) => [...prev, ...newFiles]);
+  }, []);
+
+  const onCloseModal = useCallback(() => {
+    setAddFiles([]);
+    onClose();
+  }, [onClose]);
+
+  const onMessageUpload = useCallback(() => {
+    onSaveModalData(inputRef.current?.value ?? "", allFiles);
+    onCloseModal();
+  }, [allFiles, onCloseModal, onSaveModalData])
+
+  const count = previewUrls.length;
+  const { cols, rows } = getGridConfig(count);
+  const remainder = count % cols;
+  const lastIndex = count - 1;
 
   return (
     <BaseModal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={onCloseModal}
       title="Upload images"
       contentClassName="flex flex-col w-[420px] max-w-[95vw] h-[520px] max-h-[90vh] overflow-hidden"
     >
@@ -64,33 +83,32 @@ export const ImageUploadModal = ({ onClose, onSaveInputValue, files: files = [],
         <div
           className="grid gap-0.5 rounded-xl overflow-hidden bg-zinc-100 dark:bg-zinc-900 p-2 flex-1 min-h-0"
           style={{
-            gridTemplateColumns: `repeat(${gridConfig.cols}, 1fr)`,
-            gridTemplateRows: `repeat(${gridConfig.rows}, 1fr)`,
+            gridTemplateColumns: `repeat(${cols}, 1fr)`,
+            gridTemplateRows: `repeat(${rows}, 1fr)`,
           }}
         >
-          {previewUrls.map((url) => (
-            <div
-              key={url}
-              className="overflow-hidden rounded-lg bg-zinc-200 dark:bg-zinc-800 shadow-sm flex items-center justify-center"
-            >
-              <img
-                src={url}
-                alt="Preview"
-                className="h-full w-full object-cover"
-              />
-            </div>
-          ))}
+          {previewUrls.map((url, idx) => {
+            const span = remainder !== 0 && idx === lastIndex ? cols - remainder + 1 : undefined;
+
+            return (
+              <div
+                key={url}
+                className="overflow-hidden rounded-lg bg-zinc-200 dark:bg-zinc-800 shadow-sm flex items-center justify-center"
+                style={span ? { gridColumn: `span ${span}` } : undefined}
+              >
+                <img src={url} alt="preview" className="h-full w-full object-cover" />
+              </div>
+            );
+          })}
         </div>
+
         <div className="flex flex-col gap-2 flex-shrink-0">
-          <Input
-            defaultValue={inputValue}
-            ref={ref}
-          />
+          <Input defaultValue={inputValue} ref={inputRef} onFileUpload={onFileUpload} />
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={onClose}>
+            <Button variant="outline" onClick={onCloseModal}>
               Cancel
             </Button>
-            <Button onClick={() => onSaveInputValue(ref.current?.value || '')} disabled={files.length === 0}>
+            <Button onClick={onMessageUpload} disabled={allFiles.length === 0}>
               Upload
             </Button>
           </div>

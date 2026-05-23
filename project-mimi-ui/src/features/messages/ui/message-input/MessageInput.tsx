@@ -4,6 +4,7 @@ import type { UiMessage } from "@/entities/message";
 import type { MessageCreatePayload } from "@/shared/lib/websoket/types";
 import { Button, Input } from "@/shared/ui";
 import { ImageUploadModal } from "@/shared/ui/Modal";
+import type { ImageUploadModalProps } from "@/shared/ui/Modal/ImageModal";
 
 type MessageInputProps = {
   onSend: (payload: MessageCreatePayload) => void;
@@ -20,8 +21,6 @@ export const MessageInput = ({ onSend, onEdit, selectedMessage, onCancelEdit }: 
   const trimmedValue = value.trim();
   const isEditing = selectedMessage?.action === "edit";
   const canSubmit = Boolean(userId) && (trimmedValue.length > 0 || files.length > 0);
-
-  console.log(files);
 
   useEffect(() => {
     if (isEditing && selectedMessage) {
@@ -62,6 +61,11 @@ export const MessageInput = ({ onSend, onEdit, selectedMessage, onCancelEdit }: 
     setFiles(files);
   };
 
+  const onSaveFileModalData: ImageUploadModalProps['onSaveModalData'] = (input = "", files = []) => {
+    onSend({ body: input.trim(), files });
+    setFiles([]);
+  };
+
   return (
     <form onSubmit={handleSubmit} className="flex items-center gap-2">
       <Input
@@ -81,9 +85,10 @@ export const MessageInput = ({ onSend, onEdit, selectedMessage, onCancelEdit }: 
         {isEditing ? "Save" : "Send"}
       </Button>
       <ImageUploadModal
+        isOpen={files.length !== 0}
         files={files}
         inputValue={value}
-        onSaveInputValue={(inputValue: string) => setValue(inputValue)}
+        onSaveModalData={onSaveFileModalData}
         onClose={() => setFiles([])}
       />
     </form>

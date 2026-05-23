@@ -8,6 +8,7 @@ import type { MessageStatus, UiMessage } from "@/entities/message/model/types";
 import { MessageActions } from "./MessageActions";
 import { SelectedMessageBlock } from "./SelectedMessageBlock";
 import type { MessageAction } from "@/shared/lib/websoket/types";
+import { chatTokens } from "@/features/messages/model/lib/chatTokens";
 
 const dialogScrollPositions = new Map<number, number>();
 const REPLY_BLOCK_HEIGHT = 44;
@@ -228,14 +229,17 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(
     const readBoundary = otherLastReadMessageId ?? 0;
 
     return (
-      <div className="relative rounded-lg border bg-white shadow-sm dark:bg-gray-900">
+      <div className="relative overflow-hidden rounded-lg border shadow-sm">
         <ul
           ref={listRef}
           onScroll={handleScroll}
           className={cn(
-            "scrollbar max-h-[60vh] space-y-4 overflow-y-auto p-4 pr-2",
+            "scrollbar max-h-[60vh] space-y-4 overflow-y-auto p-4 pr-2 dark:bg-[#0B141A]",
             Boolean(selectedMessage) && "pb-20",
           )}
+          style={{
+            backgroundColor: chatTokens.chatSurface.light,
+          }}
         >
           {messages.map((message: UiMessage) => {
             const isMine = currentUserId !== null && message.userId === currentUserId;

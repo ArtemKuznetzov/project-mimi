@@ -1,32 +1,105 @@
 import { cn } from "@/lib/utils";
-import { attachmentFrameClass } from "@/features/messages/model";
+import { attachmentFrameClass, ALBUM_TILE_MIN_HEIGHT, computeAlbumRowHeight, getAlbumContainerWidth, computeAlbumLayout } from "@/features/messages/model";
+import { useAlbumNaturalSizes } from "@/features/messages/model/lib/useAlbumNaturalSizes";
 import { mediaViewUrl } from "@/shared/lib/mediaUrls";
 import type { UiMessage } from "@/entities/message";
+import { MediaImage } from "./MediaImage";
 
 type ImageBlockProps = {
   attachments: UiMessage["attachments"];
   textAndAttachments: boolean;
   attachmentOnly: boolean;
   isMine: boolean;
+  embeddedInBubble?: boolean;
 };
 
-export const ImagesBlock = ({ textAndAttachments, attachments, attachmentOnly, isMine }: ImageBlockProps) => {
+export const ImagesBlock = ({
+  textAndAttachments,
+  attachments,
+  attachmentOnly,
+  isMine,
+  embeddedInBubble = false,
+}: ImageBlockProps) => {
+  const items = (attachments ?? []).filter((a) =>
+    Boolean(a.objectName),
+  );
+  const count = items.length;
+
+  const sources = items.map((a) => mediaViewUrl(a.objectName));
+  const albumSizes = useAlbumNaturalSizes(sources);
+  const loadedSizes = albumSizes.filter((s) => s !== null);
+
+  const placeholderSizes = Array(count)
+    .fill(null)
+    .map(() => ({ width: 1, height: 1 }));
+  const layoutSizes = loadedSizes.length > 0 ? loadedSizes : placeholderSizes;
+  const albumLayout = computeAlbumLayout(layoutSizes);
+  const { rowCount: rows, rowCols: colsArray, cells } = albumLayout;
+  const cols = colsArray[0] ?? 1;
+  const isSingle = count === 1;
+  const containerMaxWidth = getAlbumContainerWidth(textAndAttachments, embeddedInBubble);
+
+  const tileHeight =
+    !isSingle && loadedSizes.length > 0
+      ? computeAlbumRowHeight(loadedSizes, cols)
+      : undefined;
+
+  const frameClass = embeddedInBubble
+    ? "w-full overflow-hidden"
+    : attachmentOnly
+      ? attachmentFrameClass(isMine)
+      : "overflow-hidden rounded-lg";
+
+  const gapClass = isSingle ? "" : "gap-0.5";
+
+  if (count === 0) return null;
+
   return (
-    <div className="flex w-fit max-w-full min-w-0 flex-col gap-2">
-      <div className={cn("flex flex-col gap-1.5", textAndAttachments ? "w-full max-w-[min(280px,85vw)]" : "w-full")}>
-        {attachments?.map((i) => (
-          <div
-            key={i.objectName}
-            className={attachmentOnly ? attachmentFrameClass(isMine) : "overflow-hidden rounded-lg"}
-          >
-            <img
-              src={mediaViewUrl(i.objectName!)}
-              alt={i.fileName ?? "Attachment"}
-              className={cn("max-h-72 w-full object-cover", attachmentOnly ? "max-h-80" : "max-h-64")}
-              loading="lazy"
-            />
-          </div>
-        ))}
+    <div className={cn("flex w-fit max-w-full min-w-0", embeddedInBubble ? "w-full" : "")}>
+      <div
+        className={cn(
+          isSingle ? frameClass : cn("grid overflow-hidden", gapClass, !embeddedInBubble && frameClass),
+          isSingle && embeddedInBubble ? "w-full" : "",
+          embeddedInBubble && !isSingle && "w-full",
+          isSingle && embeddedInBubble && "w-full",
+        )}
+        style={{
+          maxWidth: embeddedInBubble ? undefined : containerMaxWidth,
+          width: embeddedInBubble ? "100%" : undefined,
+          ...(isSingle
+            ? {}
+            : {
+                gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
+                gridTemplateRows: `repeat(${rows}, ${tileHeight ?? ALBUM_TILE_MIN_HEIGHT}px)`,
+              }),
+        }}
+      >
+        {items.map((att, i) => {
+          const cell = cells[i] ?? { colSpan: 1, row: 0 };
+          const colSpan = cell.colSpan;
+          const rowSpan = cell.rowSpan ?? 1;
+          const src = mediaViewUrl(att.objectName);
+
+          return (
+            <div
+              key={att.objectName}
+              className={cn(!isSingle && "min-h-0 min-w-0")}
+              style={{
+                gridColumn: `span ${colSpan}`,
+                ...(rowSpan > 1 ? { gridRow: `span ${rowSpan}` } : {}),
+              }}
+            >
+              <MediaImage
+                src={src}
+                alt={att.fileName ?? "Attachment"}
+                mode={isSingle ? "single" : "album-tile"}
+                tileHeight={tileHeight}
+                fillBubbleWidth={isSingle && embeddedInBubble}
+                className={cn(isSingle && !embeddedInBubble && "rounded-2xl", isSingle && embeddedInBubble && "w-full")}
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );

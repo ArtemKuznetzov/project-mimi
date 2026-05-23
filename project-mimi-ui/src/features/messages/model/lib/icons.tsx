@@ -1,5 +1,6 @@
 import { AlertCircle, Check, CheckCheck, Loader2 } from "lucide-react";
 import type { MessageStatus } from "@/entities/message";
+import { chatTokens } from "./chatTokens";
 
 const getStatusIcon = (status: MessageStatus | null, isMine: boolean, isDeleted: boolean) => {
   if (!isMine || !status || isDeleted) {
@@ -12,7 +13,7 @@ const getStatusIcon = (status: MessageStatus | null, isMine: boolean, isDeleted:
     return <Loader2 size={10} className="animate-spin text-muted-foreground" />;
   }
   if (status === "read") {
-    return <CheckCheck size={12} className="text-blue-500" />;
+    return <CheckCheck size={12} className={`text-[${chatTokens.readReceipt}]`} />;
   }
   if (status === "sent") {
     return <Check size={12} className="text-muted-foreground" />;
@@ -20,4 +21,4 @@ const getStatusIcon = (status: MessageStatus | null, isMine: boolean, isDeleted:
   return null;
 };
 
-export {getStatusIcon}
+export { getStatusIcon };
