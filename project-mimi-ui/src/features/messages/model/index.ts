@@ -18,3 +18,5 @@ export {
 } from './lib/mediaLayout'
 
 export { chatSurfaceClass } from './lib/styles'
+export { chatTokens } from './lib/chatTokens'
+export { chatTokenSafelist } from './lib/chatTokenSafelist'

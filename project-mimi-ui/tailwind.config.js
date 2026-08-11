@@ -1,9 +1,11 @@
 import tailwindcssAnimate from "tailwindcss-animate";
+import { chatTokenSafelist } from "@/features/messages/model/index.ts";
 
 /** @type {import('tailwindcss').Config} */
 export default {
   darkMode: ["class"],
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  safelist: chatTokenSafelist,
   theme: {
     extend: {
       borderRadius: {

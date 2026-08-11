@@ -4,6 +4,8 @@ import { useAlbumNaturalSizes } from "@/features/messages/model/lib/useAlbumNatu
 import { mediaViewUrl } from "@/shared/lib/mediaUrls";
 import type { UiMessage } from "@/entities/message";
 import { MediaImage } from "./MediaImage";
+import { ImageGalleryModal } from "@/shared/ui/Modal/ImageGalleryModal";
+import { useState } from "react";
 
 type ImageBlockProps = {
   attachments: UiMessage["attachments"];
@@ -20,6 +22,7 @@ export const ImagesBlock = ({
   isMine,
   embeddedInBubble = false,
 }: ImageBlockProps) => {
+  const [openedImgIndex, setOpenedImgIndex] = useState<number | null>(null);
   const items = (attachments ?? []).filter((a) =>
     Boolean(a.objectName),
   );
@@ -84,6 +87,7 @@ export const ImagesBlock = ({
             <div
               key={att.objectName}
               className={cn(!isSingle && "min-h-0 min-w-0")}
+              onClick={() => setOpenedImgIndex(i)}
               style={{
                 gridColumn: `span ${colSpan}`,
                 ...(rowSpan > 1 ? { gridRow: `span ${rowSpan}` } : {}),
@@ -95,11 +99,12 @@ export const ImagesBlock = ({
                 mode={isSingle ? "single" : "album-tile"}
                 tileHeight={tileHeight}
                 fillBubbleWidth={isSingle && embeddedInBubble}
-                className={cn(isSingle && !embeddedInBubble && "rounded-2xl", isSingle && embeddedInBubble && "w-full")}
+                className={cn(isSingle && !embeddedInBubble && "rounded-2xl", isSingle && embeddedInBubble && "w-full", "cursor-pointer")}
               />
             </div>
           );
         })}
+        <ImageGalleryModal isOpen={openedImgIndex != null} onClose={() => setOpenedImgIndex(null)} images={sources} initialIndex={openedImgIndex || 0} />
       </div>
     </div>
   );
