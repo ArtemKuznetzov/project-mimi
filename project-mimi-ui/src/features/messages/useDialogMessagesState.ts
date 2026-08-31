@@ -1,11 +1,11 @@
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { RefObject } from "react";
-import type { MessageResponseDTO } from "@/shared/api/generated";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
+import type { MessageReactionDTO, MessageReactionResponseDTO, MessageResponseDTO } from "@/shared/api/generated";
 import { useChatWebsoket } from "@/shared/lib/websoket/useChatWebsoket";
-import type {MessageAction, MessageCreatePayload, ReadReceiptEvent} from "@/shared/lib/websoket/types";
+import type { MessageAction, MessageCreatePayload, ReadReceiptEvent } from "@/shared/lib/websoket/types";
 import type { UiMessage } from "@/entities/message";
 import type { MessageListHandle } from "@/features/messages/ui";
-import {useSendMessageMutation} from "@/features/messages/api/messagesApi";
+import { useSendMessageMutation } from "@/features/messages/api/messagesApi";
 
 type UseDialogMessagesStateOptions = {
   dialogId: number;
@@ -20,18 +20,26 @@ type UseDialogMessagesStateResult = {
   onSendMessage: (payload: MessageCreatePayload, replyMessage?: UiMessage) => Promise<boolean>;
   onDeleteMessage: (messageId: number) => boolean;
   onEditMessage: (messageId: number, body: string) => boolean;
+  onToggleReaction: (messageId: number, reaction: MessageReactionDTO) => boolean;
 };
 
+/**
+
+* Naming convention:
+*
+* `handle...` — process data received from WebSocket events.
+* `on...` — handle user actions that send data to WebSocket (e.g., sending a message, marking a message as read, etc.).
+  */
 export const useDialogMessagesState = ({
   dialogId,
   messagesData,
   currentUserId,
   listHandleRef,
-  onReadReceipt,
+  onReadReceipt
 }: UseDialogMessagesStateOptions): UseDialogMessagesStateResult => {
   const [liveMessagesByDialog, setLiveMessagesByDialog] = useState<Record<number, UiMessage[]>>({});
   const [localMessagesByDialog, setLocalMessagesByDialog] = useState<Record<number, UiMessage[]>>({});
-
+  
   const pendingScrollRef = useRef<string | null>(null);
 
   const [sendMessage] = useSendMessageMutation()
@@ -87,9 +95,27 @@ export const useDialogMessagesState = ({
     [dialogId, messagesData, currentUserId, listHandleRef],
   );
 
-  const { sendUpdateMessage, sendDeleteMessage } = useChatWebsoket({
+  const handleReaction = useCallback((reactions: MessageReactionResponseDTO) => {
+    if (reactions.reactions.length === 0) {
+      return;
+    }
+    setLiveMessagesByDialog((prev) => {
+      const messages = prev[dialogId] ?? [];
+      const currentMessage = messages.find((msg) => msg.id === reactions.messageId);
+      if (!currentMessage) {
+        return prev;
+      }
+      return {
+        ...prev,
+        [dialogId]: messages.map((msg) => (msg.id === reactions.messageId ? { ...msg, reactions: reactions.reactions } : msg)),
+      };
+    });
+  }, [dialogId]);
+
+  const { sendUpdateMessage, sendDeleteMessage, sendToggleReaction } = useChatWebsoket({
     dialogId,
     onMessage: handleMessage,
+    handleReaction,
     onReadReceipt,
   });
 
@@ -141,18 +167,19 @@ export const useDialogMessagesState = ({
       if (!Number.isFinite(dialogId) || !Number.isFinite(messageId) || currentUserId === null) {
         return false;
       }
-      const isSent = sendDeleteMessage(dialogId, messageId);
-      return isSent;
-    }, [currentUserId, dialogId, sendDeleteMessage]
-  )
+
+      return sendDeleteMessage(dialogId, messageId);
+    },
+    [currentUserId, dialogId, sendDeleteMessage],
+  );
 
   const onEditMessage = useCallback(
     (messageId: number, body: string)=> {
       if (!Number.isFinite(dialogId) || !Number.isFinite(messageId) || currentUserId === null) {
         return false;
       }
-      const isSent = sendUpdateMessage(dialogId, messageId, body);
-      return isSent;
+
+      return sendUpdateMessage(dialogId, messageId, body);
     }, [dialogId, currentUserId, sendUpdateMessage]
   )
 
@@ -192,5 +219,14 @@ export const useDialogMessagesState = ({
     }
   }, [localMessagesByDialog, dialogId, listHandleRef]);
 
-  return { messages, onSendMessage, onDeleteMessage, onEditMessage };
+  const onToggleReaction = useCallback(
+    (messageId: number, reaction: MessageReactionDTO) => {
+      if (!Number.isFinite(dialogId) || !Number.isFinite(messageId) || currentUserId === null) {
+        return false;
+      }
+      return sendToggleReaction(dialogId, messageId, reaction);
+    }, [dialogId, currentUserId, sendToggleReaction]
+  );
+
+  return { messages, onSendMessage, onDeleteMessage, onEditMessage, onToggleReaction };
 };

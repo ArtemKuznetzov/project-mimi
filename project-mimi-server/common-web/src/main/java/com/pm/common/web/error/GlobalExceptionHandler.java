@@ -16,6 +16,7 @@ import java.util.List;
 public class GlobalExceptionHandler {
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ErrorResponse> handleApiException(ApiException ex, HttpServletRequest request) {
+        log.warn("ApiException [{}] at {}: {}", ex.getCode(), request.getRequestURI(), ex.getMessage());
         return ResponseEntity
                 .status(ex.getStatus())
                 .body(ErrorResponse.of(ex.getStatus(), ex.getCode(), ex.getMessage(), request.getRequestURI(), ex.getDetail()));
@@ -24,6 +25,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex,
                                                           HttpServletRequest request) {
+        log.warn("Validation failed at {}: {}", request.getRequestURI(), ex.getMessage());
         List<FieldErrorDetail> errors = ex.getBindingResult().getFieldErrors().stream()
                 .map(this::toFieldError)
                 .toList();
@@ -36,6 +38,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex,
                                                                HttpServletRequest request) {
+        log.warn("IllegalArgumentException at {}: {}", request.getRequestURI(), ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ErrorResponse.of(HttpStatus.BAD_REQUEST, "BAD_REQUEST",
@@ -48,6 +51,7 @@ public class GlobalExceptionHandler {
         HttpStatus status = HttpStatus.valueOf(ex.getStatusCode().value());
         String code = status.name();
         String message = ex.getBody() != null ? ex.getBody().getDetail() : ex.getMessage();
+        log.warn("ErrorResponseException [{}] at {}: {}", status, request.getRequestURI(), message);
         return ResponseEntity
                 .status(status)
                 .body(ErrorResponse.of(status, code, message, request.getRequestURI()));
@@ -55,6 +59,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpected(Exception ex, HttpServletRequest request) {
+        log.error("Unexpected exception at {}: {}", request.getRequestURI(), ex.getMessage(), ex);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ErrorResponse.of(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR",

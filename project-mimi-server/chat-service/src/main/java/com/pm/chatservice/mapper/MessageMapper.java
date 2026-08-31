@@ -2,11 +2,14 @@ package com.pm.chatservice.mapper;
 
 import com.pm.chatservice.authclient.model.UserPublicDTO;
 import com.pm.chatservice.dto.AttachmentResponseDTO;
+import com.pm.chatservice.dto.MessageReactionResponseDTO;
 import com.pm.chatservice.dto.MessageResponseDTO;
 import com.pm.chatservice.entity.Message;
 import com.pm.chatservice.entity.MessageAttachment;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+
+import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface MessageMapper {
@@ -22,7 +25,8 @@ public interface MessageMapper {
     @Mapping(target = "clientId", source = "clientId")
     @Mapping(target = "replyMessage", source = "replyMessage")
     @Mapping(target = "attachments", source = "message.attachments")
-    MessageResponseDTO toDto(Message message, Long dialogId, UserPublicDTO user, String clientId, MessageResponseDTO replyMessage);
+    @Mapping(target = "messageReactions",source = "messageReactions")
+    MessageResponseDTO toDto(Message message, Long dialogId, UserPublicDTO user, String clientId, MessageResponseDTO replyMessage, List<MessageReactionResponseDTO.ReactionGroup> messageReactions);
 
     AttachmentResponseDTO toAttachmentDto(MessageAttachment a);
 }

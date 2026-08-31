@@ -1,6 +1,8 @@
 package com.pm.apigateway.filter;
 
 import com.pm.apigateway.dto.TokenValidationResultDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -12,6 +14,7 @@ import org.springframework.web.server.ServerWebExchange;
 
 @Component
 public class JwtValidationGatewayFilterFactory extends AbstractGatewayFilterFactory<Object> {
+    private static final Logger log = LoggerFactory.getLogger(JwtValidationGatewayFilterFactory.class);
     private final WebClient webClient;
 
     public JwtValidationGatewayFilterFactory(WebClient.Builder webClientBuilder, @Value("${auth.service.url}") String authServiceUrl) {
@@ -46,6 +49,7 @@ public class JwtValidationGatewayFilterFactory extends AbstractGatewayFilterFact
                         );
                     })
                     .onErrorResume(ex -> {
+                        log.error("Gateway filter error: {}", ex.toString(), ex);
                         exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                         return exchange.getResponse().setComplete();
                     });
