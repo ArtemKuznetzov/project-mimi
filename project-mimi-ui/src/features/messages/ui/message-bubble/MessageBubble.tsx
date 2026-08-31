@@ -5,11 +5,15 @@ import { bubbleShell, getStatusIcon } from "@/features/messages/model";
 import { ImagesBlock } from "./ImageBlock";
 import { ReplyBlock } from "./ReplyBlock";
 import { TextBlock } from "./TextBlock";
+import MessageReactions from "../message-reactions/MessageReactions";
+import type { MessageListProps } from "../message-list";
 
 type MessageBubbleProps = {
   message: UiMessage;
   isMine: boolean;
   status: MessageStatus | null;
+  scrollToMessage: (id: number) => void;
+  onToggleReaction?: MessageListProps["messageActions"]["onToggleReaction"];
   className?: string;
 };
 
@@ -20,7 +24,7 @@ const statusLabels: Record<MessageStatus, string> = {
   read: "Read",
 };
 
-export const MessageBubble = ({ message, isMine, status, className }: MessageBubbleProps) => {
+export const MessageBubble = ({ message, isMine, status, className, scrollToMessage, onToggleReaction }: MessageBubbleProps) => {
   const { body, isEdited, createdAt, replyMessage, attachments } = message;
   const isDeleted = Boolean(message.isDeleted);
 
@@ -48,10 +52,17 @@ export const MessageBubble = ({ message, isMine, status, className }: MessageBub
   );
 
   return (
-    <div className={cn("flex min-w-0 max-w-full flex-col gap-1", isMine ? "items-end" : "items-start", className)}>
+    <div
+      className={cn("group relative flex min-w-0 max-w-full flex-col gap-1", isMine ? "items-end" : "items-start", className)}
+    >
       {attachmentOnly ? (
         <div className="flex w-fit max-w-full min-w-0 flex-col gap-2">
-          <ReplyBlock isMine={isMine} isDeleted={isDeleted} replyMessage={replyMessage} />
+          <ReplyBlock
+            isMine={isMine}
+            isDeleted={isDeleted}
+            replyMessage={replyMessage}
+            onClick={scrollToMessage}
+          />
           <ImagesBlock
             attachments={attachmentItems}
             textAndAttachments={textAndAttachments}
@@ -60,10 +71,10 @@ export const MessageBubble = ({ message, isMine, status, className }: MessageBub
           />
         </div>
       ) : textAndAttachments ? (
-        <div className={cn(bubbleShell(isMine, isDeleted), "overflow-hidden p-0")}>
+        <div className={cn(bubbleShell(isMine, isDeleted), "p-0")}>
           {replyMessage && !isDeleted ? (
             <div className="px-3 pt-2">
-              <ReplyBlock isMine={isMine} isDeleted={isDeleted} replyMessage={replyMessage} />
+              <ReplyBlock isMine={isMine} isDeleted={isDeleted} replyMessage={replyMessage} onClick={scrollToMessage} />
             </div>
           ) : null}
           <ImagesBlock
@@ -80,10 +91,20 @@ export const MessageBubble = ({ message, isMine, status, className }: MessageBub
       ) : (
         <div className={cn("flex w-fit min-w-0 max-w-full flex-col gap-2", isMine ? "items-end" : "items-start")}>
           {(hasText || isDeleted || replyMessage) && (
-            <div className={bubbleShell(isMine, isDeleted)}>
-              <ReplyBlock isMine={isMine} isDeleted={isDeleted} replyMessage={replyMessage} />
-              <TextBlock text={trimmedBody} isDeleted={isDeleted} />
-              {isDeleted && <p className="whitespace-pre-wrap break-words break-all leading-snug">Message deleted</p>}
+            <div className="relative">
+              <div className={bubbleShell(isMine, isDeleted)}>
+                <ReplyBlock isMine={isMine} isDeleted={isDeleted} replyMessage={replyMessage} onClick={scrollToMessage} />
+                <TextBlock text={trimmedBody} isDeleted={isDeleted} />
+                {isDeleted && <p className="whitespace-pre-wrap break-words break-all leading-snug">Message deleted</p>}
+                {!isDeleted && (
+                  <MessageReactions
+                    isMine={isMine}
+                    reactions={message.messageReactions}
+                    onToggleReaction={onToggleReaction}
+                    messageId={message.id}
+                  />
+                )}
+              </div>
             </div>
           )}
           {!isDeleted && hasAttachments && (

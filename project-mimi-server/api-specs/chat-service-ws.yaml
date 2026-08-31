@@ -1,0 +1,68 @@
+openapi: 3.0.3
+info:
+  title: Chat Service WS API
+  version: 1.0.0
+paths:
+  /toggle:
+    post:
+      operationId: toggle
+      summary: Add or remove reaction from message
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageReactionDTO"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageReactionResponseDTO"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    MessageReactionDTO:
+      type: object
+      required:
+        - emoji
+      properties:
+        emoji:
+          type: string
+          maxLength: 16
+    MessageReactionResponseDTO:
+      type: object
+      required:
+        - messageId
+        - reactions
+      properties:
+        messageId:
+          type: integer
+          format: int64
+        reactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReactionGroup"
+
+    ReactionGroup:
+      type: object
+      required:
+        - emoji
+        - userIds
+      properties:
+        emoji:
+          type: string
+        userIds:
+          type: array
+          items:
+            type: integer
+            format: int64
+

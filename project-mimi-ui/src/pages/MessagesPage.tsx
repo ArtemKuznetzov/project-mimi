@@ -30,7 +30,7 @@ export const MessagesPage = () => {
     currentUserId,
   });
 
-  const { messages, onSendMessage, onDeleteMessage, onEditMessage } = useDialogMessagesState({
+  const { messages, onSendMessage, onDeleteMessage, onEditMessage, onToggleReaction } = useDialogMessagesState({
     dialogId: dialogIdInt,
     messagesData,
     currentUserId,
@@ -56,6 +56,7 @@ export const MessagesPage = () => {
   const messageActions: MessageListProps['messageActions'] = useMemo(() => ({
     onReadCandidate,
     onDeleteMessage,
+    onToggleReaction,
     onSelectMessage: (message, action) => setSelectedMessage({...message, action})
   }), [onDeleteMessage, onReadCandidate])
 

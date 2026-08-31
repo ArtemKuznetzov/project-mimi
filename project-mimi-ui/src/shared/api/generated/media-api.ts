@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/messages/{dialogId}/message/send": {
+    "/files/upload": {
         parameters: {
             query?: never;
             header?: never;
@@ -13,14 +13,15 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["sendMessage"];
+        /** Upload file */
+        post: operations["uploadFile"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/dialogs/{dialogId}/read": {
+    "/files/upload-multi": {
         parameters: {
             query?: never;
             header?: never;
@@ -29,21 +30,21 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post: operations["markDialogRead"];
+        post: operations["uploadFiles"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/messages/{dialogId}": {
+    "/files/view/{objectName}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["getMessages"];
+        get: operations["viewFile"];
         put?: never;
         post?: never;
         delete?: never;
@@ -52,14 +53,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/dialogs": {
+    "/files/metadata/{objectName}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["getDialogs"];
+        get: operations["getMetadata"];
         put?: never;
         post?: never;
         delete?: never;
@@ -68,14 +69,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/dialogs/{dialogId}": {
+    "/files/download/{objectName}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["getDialogById"];
+        get: operations["downloadFile"];
         put?: never;
         post?: never;
         delete?: never;
@@ -84,17 +85,17 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/dialogs/{dialogId}/read-state": {
+    "/files/{objectName}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["getDialogReadState"];
+        get?: never;
         put?: never;
         post?: never;
-        delete?: never;
+        delete: operations["deleteFile"];
         options?: never;
         head?: never;
         patch?: never;
@@ -104,66 +105,19 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        AttachmentResponseDTO: {
-            objectName?: string;
-            fileName?: string;
-            contentType?: string;
+        UploadFileRequest: {
+            /** Format: binary */
+            file?: string;
+        };
+        MediaFileInfoDTO: {
+            objectName: string;
+            originalName?: string;
             extension?: string;
-            /** Format: int32 */
+            contentType: string;
+            /** Format: int64 */
             size?: number;
         };
-        MessageResponseDTO: {
-            /** Format: int64 */
-            id: number;
-            /** Format: int64 */
-            dialogId: number;
-            body: string;
-            /** Format: date-time */
-            createdAt: string;
-            isDeleted?: boolean;
-            isEdited?: boolean;
-            replyMessage?: components["schemas"]["MessageResponseDTO"];
-            attachments?: components["schemas"]["AttachmentResponseDTO"][];
-            messageReactions?: components["schemas"]["ReactionGroup"][];
-            userName: string;
-            /** Format: int64 */
-            userId: number;
-            userAvatarId?: string;
-            clientId?: string;
-        };
-        ReactionGroup: {
-            emoji?: string;
-            userIds?: number[];
-        };
-        ReadReceiptDTO: {
-            /** Format: int64 */
-            lastReadMessageId: number;
-        };
-        DialogReadStateDTO: {
-            /** Format: int64 */
-            dialogId: number;
-            /** Format: int64 */
-            userId: number;
-            /** Format: int64 */
-            lastReadMessageId?: number;
-            /** Format: date-time */
-            lastReadAt?: string;
-            /** Format: int64 */
-            otherLastReadMessageId?: number;
-        };
-        DialogResponseDTO: {
-            /** Format: int64 */
-            id: number;
-            /** Format: int64 */
-            userId: number;
-            userName: string;
-            userAvatarId?: string;
-            lastMessageBody?: string;
-            /** Format: date-time */
-            lastMessageDate?: string;
-            /** Format: int64 */
-            lastMessageUserId?: number;
-        };
+        StreamingResponseBody: Record<string, never>;
     };
     responses: never;
     parameters: never;
@@ -173,94 +127,18 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    sendMessage: {
-        parameters: {
-            query?: {
-                body?: string;
-                replyMessageId?: number;
-                clientId?: string;
-            };
-            header?: never;
-            path: {
-                dialogId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "multipart/form-data": {
-                    files?: string[];
-                };
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["MessageResponseDTO"];
-                };
-            };
-        };
-    };
-    markDialogRead: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                dialogId: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReadReceiptDTO"];
-            };
-        };
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["DialogReadStateDTO"];
-                };
-            };
-        };
-    };
-    getMessages: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                dialogId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "*/*": components["schemas"]["MessageResponseDTO"][];
-                };
-            };
-        };
-    };
-    getDialogs: {
+    uploadFile: {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["UploadFileRequest"];
+            };
+        };
         responses: {
             /** @description OK */
             200: {
@@ -268,17 +146,43 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["DialogResponseDTO"][];
+                    "*/*": components["schemas"]["MediaFileInfoDTO"];
                 };
             };
         };
     };
-    getDialogById: {
+    uploadFiles: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    files: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MediaFileInfoDTO"][];
+                };
+            };
+        };
+    };
+    viewFile: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                dialogId: number;
+                objectName: string;
             };
             cookie?: never;
         };
@@ -290,17 +194,17 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["DialogResponseDTO"];
+                    "*/*": components["schemas"]["StreamingResponseBody"];
                 };
             };
         };
     };
-    getDialogReadState: {
+    getMetadata: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                dialogId: number;
+                objectName: string;
             };
             cookie?: never;
         };
@@ -312,8 +216,50 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["DialogReadStateDTO"];
+                    "*/*": components["schemas"]["MediaFileInfoDTO"];
                 };
+            };
+        };
+    };
+    downloadFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                objectName: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["StreamingResponseBody"];
+                };
+            };
+        };
+    };
+    deleteFile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                objectName: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

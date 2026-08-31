@@ -1,5 +1,5 @@
 import tailwindcssAnimate from "tailwindcss-animate";
-import { chatTokenSafelist } from "@/features/messages/model/index.ts";
+import { chatTokenSafelist } from "./src/features/messages/model/lib/chatTokenSafelist.ts";
 
 /** @type {import('tailwindcss').Config} */
 export default {

@@ -29,42 +29,71 @@ const specs = [
     localFile: null,
     output: join(outputDir, "chat-api.ts"),
   },
+  {
+    name: "chat-ws",
+    url: null,
+    localFile: resolve(projectRoot, "..", "project-mimi-server", "api-specs", "chat-service-ws.yaml"),
+    output: join(outputDir, "chat-ws.ts"),
+  },
+  {
+    name: "media",
+    url: `${apiGatewayUrl}/api-docs/media`,
+    localFile: resolve(projectRoot, "..", "project-mimi-server", "api-specs", "media-service.yaml"),
+    output: join(outputDir, "media-api.ts"),
+  },
 ];
+
+let hasErrors = false;
 
 for (const spec of specs) {
   try {
-    let inputSource = "";
+    let inputSource;
 
-    if (useLocalFiles && spec.localFile) {
+    if (spec.localFile && (!spec.url || useLocalFiles)) {
       try {
         readFileSync(spec.localFile, "utf-8");
         inputSource = spec.localFile;
+
         console.log(`Type generation for ${spec.name} from local file...`);
-      } catch (error) {
-        console.warn(`Local file ${spec.localFile} was not found, try to use URL...`);
-        inputSource = spec.url;
-        console.log(`Type generation for ${spec.name} from ${spec.url}...`);
+      } catch {
+        if (spec.url) {
+          inputSource = spec.url;
+
+          console.log(`Local file ${spec.localFile} was not found, trying ${spec.url}...`);
+        } else {
+          console.error(`Local file ${spec.localFile} was not found and no URL is available for ${spec.name}.`);
+
+          hasErrors = true;
+          continue;
+        }
       }
-    } else {
+    } else if (spec.url) {
       inputSource = spec.url;
+
       console.log(`Type generation for ${spec.name} from ${spec.url}...`);
+    } else {
+      console.error(`No source available for ${spec.name}.`);
+
+      hasErrors = true;
+      continue;
     }
 
-    const command = `npx openapi-typescript "${inputSource}" -o "${spec.output}"`;
-    execSync(command, {
+    execSync(`npx openapi-typescript "${inputSource}" -o "${spec.output}"`, {
       cwd: projectRoot,
       stdio: "inherit",
-      encoding: "utf-8",
     });
 
     console.log(`Types for ${spec.name} were successfully generated in ${spec.output}\n`);
-  } catch (error) {
-    console.error(`Error when generating types for ${spec.name}:`, error.message);
-    if (!useLocalFiles) {
-      console.warn(`Make sure that the server is running and accessible at ${spec.url}`);
-      console.warn(`Try using local file: USE_LOCAL_SPECS=true npm run generate:api-types`);
-    }
+  } catch {
+    hasErrors = true;
+
+    console.error(`Type generation failed for ${spec.name}.\n`);
   }
 }
 
-console.log("Generation is complete!");
+if (hasErrors) {
+  console.error("TypeScript generation finished with errors.");
+  process.exit(1);
+}
+
+console.log("TypeScript generation completed successfully.");

@@ -1,9 +1,8 @@
 package com.pm.chatservice.controller;
 
-import com.pm.chatservice.dto.MessageCreateDTO;
-import com.pm.chatservice.dto.MessageUpdateDTO;
-import com.pm.chatservice.dto.MessageResponseDTO;
+import com.pm.chatservice.dto.*;
 import com.pm.chatservice.service.DialogService;
+import com.pm.chatservice.service.MessageReactionService;
 import com.pm.chatservice.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +21,7 @@ public class ChatSocketController {
     private final SimpMessagingTemplate messagingTemplate;
     private final MessageService messageService;
     private final DialogService dialogService;
+    private final MessageReactionService messageReactionService;
 
     private Long getUserIdInDialog(Long dialogId, Principal principal) {
         if (principal == null) {
@@ -61,6 +61,21 @@ public class ChatSocketController {
 
         if (updatedMessage != null) {
             messagingTemplate.convertAndSend("/topic/dialogs/" + dialogId + "/edit", updatedMessage);
+        }
+    }
+
+    @MessageMapping("/dialogs/{dialogId}/add-reaction/{messageId}")
+    public void addReaction(
+            @DestinationVariable Long dialogId,
+            @DestinationVariable Long messageId,
+            MessageReactionDTO messageReaction,
+            Principal principal
+    ) {
+        Long userId = getUserIdInDialog(dialogId, principal);
+        MessageReactionResponseDTO reaction = messageReactionService.toggle(messageReaction, userId, dialogId, messageId);
+
+        if (reaction != null) {
+            messagingTemplate.convertAndSend("/topic/dialogs/" + dialogId + "/add-reaction", reaction);
         }
     }
 }

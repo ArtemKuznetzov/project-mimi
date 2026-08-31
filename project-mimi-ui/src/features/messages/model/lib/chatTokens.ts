@@ -8,7 +8,7 @@ export const chatTokens = {
     light: {
       mine: { bg: "#D9FDD3" },
       yours: { bg: "#FFFFFF" },
-      deleted: { bg: "gray-200", bgDark: "gray-700" },
+      deleted: { bg: "#E5E7EB", bgDark: "#374151" },
     },
     dark: {
       mine: { bg: "#005C4B" },
@@ -22,12 +22,12 @@ export const chatTokens = {
       dark: "#E9EDEF",
     },
     secondary: {
-      light: "#111B21/85",
-      dark: "#E9EDEF/85",
+      light: "#111B21",
+      dark: "#E9EDEF",
     },
     deleted: {
-      light: "gray-500",
-      dark: "gray-300",
+      light: "#6B7280",
+      dark: "#D1D5DB",
     },
   },
 
@@ -43,8 +43,8 @@ export const chatTokens = {
   },
 
   replyBg: {
-    my: { light: "rgba(0, 0, 0, 0.04)", dark: "rgba(255, 255, 255, 0.06)" },
-    your: { light: "#F0F2F5", dark: "rgba(255, 255, 255, 0.05)" },
+    my: { light: "rgba(0,0,0,0.04)", dark: "rgba(255,255,255,0.06)" },
+    your: { light: "#F0F2F5", dark: "rgba(255,255,255,0.05)" },
   },
 
   readReceipt: "#53BDEB",
@@ -54,7 +54,7 @@ export const chatTokens = {
   },
 
   ring: {
-    message: { light: "rgba(0, 0, 0, 0.04)", dark: "rgba(255, 255, 255, 0.06)" },
-    input: { light: "rgba(0, 0, 0, 0.06)", dark: "rgba(255, 255, 255, 0.06)" },
+    message: { light: "rgba(0,0,0,0.04)", dark: "rgba(255,255,255,0.06)" },
+    input: { light: "rgba(0,0,0,0.06)", dark: "rgba(255,255,255,0.06)" },
   },
 } as const;

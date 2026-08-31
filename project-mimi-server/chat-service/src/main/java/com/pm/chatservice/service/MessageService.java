@@ -4,15 +4,19 @@ import com.pm.chatservice.authclient.model.UserPublicDTO;
 import com.pm.chatservice.client.AuthServiceClient;
 import com.pm.chatservice.client.MediaServiceClient;
 import com.pm.chatservice.dto.MessageCreateDTO;
+import com.pm.chatservice.dto.MessageReactionResponseDTO;
 import com.pm.chatservice.dto.MessageResponseDTO;
 import com.pm.chatservice.dto.MessageUpdateDTO;
 import com.pm.chatservice.entity.Dialog;
 import com.pm.chatservice.entity.Message;
 import com.pm.chatservice.entity.MessageAttachment;
+import com.pm.chatservice.entity.MessageReaction;
 import com.pm.chatservice.mapper.MessageMapper;
+import com.pm.chatservice.mapper.MessageReactionMapper;
 import com.pm.chatservice.mediaclient.model.MediaFileInfoDTO;
 import com.pm.chatservice.repository.DialogParticipantRepository;
 import com.pm.chatservice.repository.DialogRepository;
+import com.pm.chatservice.repository.MessageReactionRepository;
 import com.pm.chatservice.repository.MessageRepository;
 import com.pm.common.web.exception.ApiException;
 import lombok.RequiredArgsConstructor;
@@ -32,10 +36,15 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final AuthServiceClient authServiceClient;
     private final MediaServiceClient mediaServiceClient;
-    private final MessageMapper messageMapper;
+
     private final DialogRepository dialogRepository;
     private final DialogParticipantRepository dialogParticipantRepository;
+    private final MessageReactionRepository messageReactionRepository;
 
+    private final MessageMapper messageMapper;
+    private final MessageReactionMapper messageReactionMapper;
+
+    @Transactional(readOnly = true)
     public List<MessageResponseDTO> getMessagesByDialogId(Long dialogId) {
         List<Message> messageList = messageRepository.findByDialog_IdOrderByCreatedAtAsc(dialogId);
 
@@ -43,26 +52,34 @@ public class MessageService {
                 .map(Message::getAuthorId)
                 .collect(Collectors.toSet());
 
-        Map<Long, UserPublicDTO> dialogUsers = authorIds.stream()
+        Map<Long, UserPublicDTO> dialogUsersMap = authorIds.stream()
                 .collect(Collectors.toMap(id -> id, authServiceClient::getUser));
 
-        Map<Long, Message> messagesById = messageList.stream()
+        Map<Long, Message> messagesMap = messageList.stream()
                 .collect(Collectors.toMap(Message::getId, message -> message));
+
+        List<Long> messageIds = messageList.stream().map(Message::getId).toList();
+        Map<Long, List<MessageReaction>> reactionsMap = messageReactionRepository.findByMessageIdIn(messageIds).stream()
+                .collect(Collectors.groupingBy(r -> r.getMessage().getId()));
 
 
         return messageList
                 .stream()
                 .map(message -> {
-                    MessageResponseDTO replyDto = null;
-                    Long replyMessageId = message.getReplyMessageId();
-                    if (replyMessageId != null) {
-                        Message replyMessage = messagesById.get(replyMessageId);
-                        if (replyMessage != null) {
-                            UserPublicDTO replyUser = dialogUsers.get(replyMessage.getAuthorId());
-                            replyDto = messageMapper.toDto(replyMessage, dialogId, replyUser, null, null);
-                        }
+                    List<MessageReactionResponseDTO.ReactionGroup> reactionDto = List.of();
+                    List<MessageReaction> reactionsByMessageId = reactionsMap.get(message.getId());
+                    if (reactionsByMessageId != null && !reactionsByMessageId.isEmpty()) {
+                        reactionDto = messageReactionMapper.toDto(reactionsByMessageId);
                     }
-                    return messageMapper.toDto(message, dialogId, dialogUsers.get(message.getAuthorId()), null, replyDto);
+
+                    MessageResponseDTO replyDto = null;
+                    Message replyMessage = messagesMap.get(message.getReplyMessageId());
+                    if (replyMessage != null) {
+                        UserPublicDTO replyUser = dialogUsersMap.get(replyMessage.getAuthorId());
+                        replyDto = messageMapper.toDto(replyMessage, dialogId, replyUser, null, null, null);
+                    }
+
+                    return messageMapper.toDto(message, dialogId, dialogUsersMap.get(message.getAuthorId()), null, replyDto, reactionDto);
                 })
                 .toList();
     }
@@ -131,7 +148,7 @@ public class MessageService {
         Message saved = messageRepository.save(message);
         dialog.setLastMessageId(saved.getId());
         dialog.setUpdatedAt(saved.getCreatedAt());
-        return messageMapper.toDto(saved, dialogId, user, dto.clientId(), replyDto);
+        return messageMapper.toDto(saved, dialogId, user, dto.clientId(), replyDto, null);
     }
 
     @Transactional
@@ -142,22 +159,12 @@ public class MessageService {
 
         UserPublicDTO user = authServiceClient.getUser(userId);
         Message message = getMessageFromDialog(dialogId, messageId, userId);
-        Dialog dialog = message.getDialog();
 
         message.setIsDeleted(true);
         message.setUpdatedAt(Instant.now());
         Message saved = messageRepository.save(message);
 
-        if (Objects.equals(dialog.getLastMessageId(), message.getId())) {
-            Message lastMessage = messageRepository
-                    .findTopByDialog_IdAndIsDeletedFalseOrderByCreatedAtDesc(dialogId)
-                    .orElse(null);
-            dialog.setLastMessageId(lastMessage != null ? lastMessage.getId() : null);
-            dialog.setUpdatedAt(Instant.now());
-        }
-
-        MessageResponseDTO replyDto = buildReplyDto(dialogId, message.getReplyMessageId());
-        return messageMapper.toDto(saved, dialogId,user,null, replyDto);
+        return messageMapper.toDto(saved, dialogId,user,null, null, null);
     }
 
     @Transactional
@@ -183,7 +190,10 @@ public class MessageService {
 
         Message saved = messageRepository.save(message);
         MessageResponseDTO replyDto = buildReplyDto(dialogId, message.getReplyMessageId());
-        return messageMapper.toDto(saved, dialogId, user, null, replyDto);
+
+        List<MessageReaction> reactions = messageReactionRepository.findByMessageId(messageId);
+        List<MessageReactionResponseDTO.ReactionGroup> reactionsDto = messageReactionMapper.toDto(reactions);
+        return messageMapper.toDto(saved, dialogId, user, null, replyDto, reactionsDto);
     }
 
     private MessageResponseDTO buildReplyDto(Long dialogId, Long replyMessageId) {
@@ -195,7 +205,7 @@ public class MessageService {
             return null;
         }
         UserPublicDTO replyUser = authServiceClient.getUser(replyMessage.getAuthorId());
-        return messageMapper.toDto(replyMessage, dialogId, replyUser, null, null);
+        return messageMapper.toDto(replyMessage, dialogId, replyUser, null, null, null);
     }
 
     private Message getMessageFromDialog(Long dialogId, Long messageId, Long userId) {

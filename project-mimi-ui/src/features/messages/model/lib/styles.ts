@@ -14,10 +14,10 @@ const bubbleShell = (isMine: boolean, isDeleted: boolean) =>
 
 const replySnippetClass = (isMine: boolean) =>
   cn(
-    "mb-2 w-full rounded-md border-l-[3px] px-2 py-1 text-[11px] leading-snug",
+    "mb-2 w-full rounded-md border-l-[3px] px-2 py-1 text-[11px] leading-snug cursor-pointer",
     isMine
-      ? `border-[${chatTokens.border.outgoing.light}] bg-[${chatTokens.replyBg.my.light}] text-[${chatTokens.text.secondary.light}] dark:border-[${chatTokens.border.outgoing.dark}] dark:bg-[${chatTokens.replyBg.my.dark}] dark:text-[${chatTokens.text.secondary.dark}]`
-      : `border-[${chatTokens.border.incoming.light}] bg-[${chatTokens.replyBg.your.light}] text-[${chatTokens.text.secondary.light}] dark:border-[${chatTokens.border.incoming.dark}] dark:bg-[${chatTokens.replyBg.your.dark}] dark:text-[${chatTokens.text.secondary.dark}]`,
+      ? `border-[${chatTokens.border.outgoing.light}] bg-[${chatTokens.replyBg.my.light}] text-[${chatTokens.text.secondary.light}]/85 dark:border-[${chatTokens.border.outgoing.dark}] dark:bg-[${chatTokens.replyBg.my.dark}] dark:text-[${chatTokens.text.secondary.dark}]/85`
+      : `border-[${chatTokens.border.incoming.light}] bg-[${chatTokens.replyBg.your.light}] text-[${chatTokens.text.secondary.light}]/85 dark:border-[${chatTokens.border.incoming.dark}] dark:bg-[${chatTokens.replyBg.your.dark}] dark:text-[${chatTokens.text.secondary.dark}]/85`,
   );
 
 const attachmentFrameClass = (isMine: boolean) =>

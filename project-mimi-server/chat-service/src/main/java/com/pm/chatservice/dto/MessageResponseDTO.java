@@ -15,6 +15,7 @@ public record MessageResponseDTO(
         Boolean isEdited,
         MessageResponseDTO replyMessage,
         List<AttachmentResponseDTO> attachments,
+        List<MessageReactionResponseDTO.ReactionGroup> messageReactions,
 
         @NotBlank String userName,
         @NotNull Long userId,

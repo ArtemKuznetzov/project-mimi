@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                            http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.31.xsd">
+    <changeSet id="v1-create-message-reaction" author="Kuznetsov Artem">
+        <createTable tableName="message_reactions">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="message_id" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints nullable="false" />
+            </column>
+            <column name="emoji" type="VARCHAR(16)">
+                <constraints nullable="false" />
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="message_reactions"
+                baseColumnNames="message_id"
+                referencedTableName="messages"
+                referencedColumnNames="id"
+                constraintName="fk_message_reactions_message"
+                onDelete="CASCADE"/>
+
+        <addUniqueConstraint
+                tableName="message_reactions"
+                columnNames="message_id, user_id, emoji"
+                constraintName="uq_message_reactions_msg_user_emoji" />
+
+        <createIndex tableName="message_reactions" indexName="idx_message_reactions_message_id">
+            <column name="message_id" />
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import type { Client, IMessage, StompSubscription } from "@stomp/stompjs";
-import type { MessageResponseDTO } from "@/shared/api/generated";
+import type { MessageReactionDTO, MessageReactionResponseDTO, MessageResponseDTO } from "@/shared/api/generated";
 import { createStompClient } from "@/shared/lib/websoket/client";
 import type {MessageAction, MessageCreatePayload, ReadReceiptEvent} from "@/shared/lib/websoket/types";
 import type { RootState } from "@/app/store";
@@ -10,9 +10,10 @@ type UseWebsoketOptions = {
   dialogId: number;
   onMessage: (message: MessageResponseDTO, action: MessageAction) => void;
   onReadReceipt?: (event: ReadReceiptEvent) => void;
+  handleReaction?: (reaction: MessageReactionResponseDTO) => void
 };
 
-export const useChatWebsoket = ({ dialogId, onMessage, onReadReceipt }: UseWebsoketOptions) => {
+export const useChatWebsoket = ({ dialogId, onMessage, onReadReceipt, handleReaction }: UseWebsoketOptions) => {
   const [isConnected, setIsConnected] = useState(false);
   const clientRef = useRef<Client | null>(null);
 
@@ -20,9 +21,11 @@ export const useChatWebsoket = ({ dialogId, onMessage, onReadReceipt }: UseWebso
   const readSubscriptionRef = useRef<StompSubscription | null>(null);
   const deleteSubscriptionRef = useRef<StompSubscription | null>(null);
   const updateSubscriptionRef = useRef<StompSubscription | null>(null);
+  const toggleReactionSubscriptionRef = useRef<StompSubscription | null>(null);
 
   const onMessageRef = useRef(onMessage);
   const onReadReceiptRef = useRef(onReadReceipt);
+  const handleReactionRef = useRef(handleReaction)
 
   const accessToken = useSelector((state: RootState) => state.auth.accessToken);
 
@@ -33,6 +36,10 @@ export const useChatWebsoket = ({ dialogId, onMessage, onReadReceipt }: UseWebso
   useEffect(() => {
     onReadReceiptRef.current = onReadReceipt;
   }, [onReadReceipt]);
+
+  useEffect(() => {
+    handleReactionRef.current = handleReaction
+  }, [handleReaction])
 
   useEffect(() => {
     if (!Number.isFinite(dialogId)) {
@@ -56,7 +63,7 @@ export const useChatWebsoket = ({ dialogId, onMessage, onReadReceipt }: UseWebso
           return;
         }
         try {
-          const payload = JSON.parse(frame.body) as MessageResponseDTO;
+          const payload = JSON.parse(frame.body) satisfies MessageResponseDTO;
           onMessageRef.current?.(payload, "send");
         } catch {
           // ignore invalid payloads
@@ -69,7 +76,7 @@ export const useChatWebsoket = ({ dialogId, onMessage, onReadReceipt }: UseWebso
           return;
         }
         try {
-          const payload = JSON.parse(frame.body) as ReadReceiptEvent;
+          const payload = JSON.parse(frame.body) satisfies ReadReceiptEvent;
           onReadReceiptRef.current?.(payload);
         } catch {
           // ignore invalid payloads
@@ -82,7 +89,7 @@ export const useChatWebsoket = ({ dialogId, onMessage, onReadReceipt }: UseWebso
             return;
           }
           try {
-            const payload = JSON.parse(frame.body) as MessageResponseDTO
+            const payload = JSON.parse(frame.body) satisfies MessageResponseDTO
             onMessageRef.current?.(payload, "delete");
           } catch {
             // ignore invalid payloads
@@ -95,13 +102,26 @@ export const useChatWebsoket = ({ dialogId, onMessage, onReadReceipt }: UseWebso
           return;
         }
         try {
-          const payload = JSON.parse(frame.body) as MessageResponseDTO;
+          const payload = JSON.parse(frame.body) satisfies MessageResponseDTO;
           onMessageRef.current?.(payload, "edit");
         } catch {
           // ignore invalid payloads
         }
       });
-    };
+
+    toggleReactionSubscriptionRef.current?.unsubscribe();
+    toggleReactionSubscriptionRef.current = client.subscribe(`/topic/dialogs/${dialogId}/add-reaction`, (frame: IMessage) => {
+      if (!frame.body) {
+        return;
+      }
+      try {
+        const payload = JSON.parse(frame.body) satisfies MessageReactionResponseDTO;
+        handleReactionRef.current?.(payload);
+      } catch {
+        // ignore invalid payloads
+      }
+    });
+  };
 
     client.onDisconnect = () => {
       setIsConnected(false);
@@ -128,6 +148,8 @@ export const useChatWebsoket = ({ dialogId, onMessage, onReadReceipt }: UseWebso
       messageSubscriptionRef.current = null;
       readSubscriptionRef.current?.unsubscribe();
       readSubscriptionRef.current = null;
+      toggleReactionSubscriptionRef.current?.unsubscribe()
+      toggleReactionSubscriptionRef.current = null
 
       client.deactivate();
       clientRef.current = null;
@@ -180,5 +202,18 @@ export const useChatWebsoket = ({ dialogId, onMessage, onReadReceipt }: UseWebso
     [],
   )
 
-  return { sendMessage, sendUpdateMessage, sendDeleteMessage, isConnected };
+  const sendToggleReaction = useCallback(
+    (dialogId: number, messageId: number, reaction: MessageReactionDTO) => {
+      const client = clientRef.current;
+      if (!client || !client.connected) {
+        return false
+      }
+      client.publish({
+        destination: `/app/dialogs/${dialogId}/add-reaction/${messageId}`,
+        body: JSON.stringify(reaction)
+      })
+      return true
+  }, []);
+
+  return { sendMessage, sendUpdateMessage, sendDeleteMessage, sendToggleReaction, isConnected };
 };

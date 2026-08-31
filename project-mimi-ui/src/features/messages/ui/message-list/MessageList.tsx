@@ -9,6 +9,7 @@ import { MessageActions } from "./MessageActions";
 import { SelectedMessageBlock } from "./SelectedMessageBlock";
 import type { MessageAction } from "@/shared/lib/websoket/types";
 import { chatTokens } from "@/features/messages/model/lib/chatTokens";
+import type { MessageReactionDTO } from "@/shared/api/generated";
 
 const dialogScrollPositions = new Map<number, number>();
 const REPLY_BLOCK_HEIGHT = 44;
@@ -35,6 +36,8 @@ export type MessageListProps = {
     onReadCandidate: (messageId: number) => void;
     onDeleteMessage: (messageId: number) => void;
     onSelectMessage: (message: UiMessage, action: MessageAction) => void;
+
+    onToggleReaction?: (messageId: number, reaction: MessageReactionDTO) => void;
   };
   selectedMessage?: UiMessage;
   onCloseReply: () => void;
@@ -51,6 +54,7 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(
   }: MessageListProps, ref) => {
     const currentUserId = useAppSelector((state) => state.auth.userId);
     const listRef = useRef<HTMLUListElement | null>(null);
+    const messagesDivRef = useRef<Record<number, HTMLLIElement | null>>({});
     const lastDialogIdRef = useRef<number | null>(null);
     const shouldRestoreRef = useRef(false);
     const observerRef = useRef<IntersectionObserver | null>(null);
@@ -58,7 +62,7 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(
     const maxReportedRef = useRef(0);
     const [menuState, setMenuState] = useState<MenuState | null>(null);
 
-    const { onSelectMessage, onReadCandidate, onDeleteMessage } = messageActions;
+    const { onSelectMessage, onReadCandidate, onDeleteMessage, onToggleReaction } = messageActions;
 
     const handleContextMenu = useCallback(
       (event: ReactMouseEvent<HTMLDivElement>, message: UiMessage, isMine: boolean) => {
@@ -92,6 +96,17 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(
         return false;
       }
       return list.scrollHeight - list.scrollTop - list.clientHeight < threshold;
+    };
+
+    const scrollToMessage = (id: number) => {
+      const list = listRef.current;
+      const el = messagesDivRef.current[id];
+      if (!list || !el) return;
+
+      const listRect = list.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+      const top = list.scrollTop + (elRect.top - listRect.top) - list.clientHeight / 2 + elRect.height / 2;
+      list.scrollTo({ top, behavior: "smooth" });
     };
 
     useImperativeHandle(
@@ -257,6 +272,9 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(
               <li
                 key={message.id}
                 data-message-id={message.id}
+                ref={(el) => {
+                  messagesDivRef.current[message.id] = el;
+                }}
                 data-read-observe={shouldObserve ? "true" : undefined}
                 className={cn("flex items-end gap-3", isMine ? "justify-end" : "justify-start")}
               >
@@ -268,7 +286,7 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(
                   )}
                   onContextMenu={(event) => handleContextMenu(event, message, isMine)}
                 >
-                  <MessageBubble message={message} isMine={isMine} status={status} />
+                  <MessageBubble message={message} isMine={isMine} status={status} scrollToMessage={scrollToMessage} onToggleReaction={onToggleReaction} />
                 </div>
               </li>
             );

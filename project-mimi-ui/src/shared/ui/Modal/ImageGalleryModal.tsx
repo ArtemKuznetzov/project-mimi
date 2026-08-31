@@ -58,7 +58,7 @@ export const ImageGalleryModal = ({
     <BaseModal
       isOpen={isOpen}
       onClose={onClose}
-      contentClassName="flex flex-col w-screen max-w-none h-screen min-h-screen min-w-96 max-h-[90vh] overflow-hidden bg-black/90 p-0 border-0"
+      contentClassName="flex  flex-col w-screen max-w-none h-screen min-h-screen min-w-96 max-h-[90vh] overflow-hidden bg-black/90 p-0 border-0"
       hideCloseButton
     >
       <div className="flex items-center justify-between px-4 py-2 bg-black/50 z-10">
