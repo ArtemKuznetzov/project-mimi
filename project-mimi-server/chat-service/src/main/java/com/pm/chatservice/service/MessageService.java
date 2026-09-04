@@ -21,6 +21,7 @@ import com.pm.chatservice.repository.MessageRepository;
 import com.pm.common.web.exception.ApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,6 +34,11 @@ import java.util.stream.IntStream;
 @Service
 @RequiredArgsConstructor
 public class MessageService {
+    private static final String VALIDATION_ERROR_DIALOG_ID_NULL = "dialogId must not be null";
+    private static final String VALIDATION_ERROR_MESSAGE_ID_NULL = "messageId must not be null";
+    private static final String VALIDATION_ERROR_USER_ID_NULL = "userId must not be null";
+    private static final String VALIDATION_ERROR_MESSAGE_PAYLOAD_EMPTY = "Message must contain text or at least one attachment";
+
     private final MessageRepository messageRepository;
     private final AuthServiceClient authServiceClient;
     private final MediaServiceClient mediaServiceClient;
@@ -49,16 +55,16 @@ public class MessageService {
         List<Message> messageList = messageRepository.findByDialog_IdOrderByCreatedAtAsc(dialogId);
 
         Set<Long> authorIds = messageList.stream()
-                .map(Message::getAuthorId)
+                .map(m -> m.getAuthorId())
                 .collect(Collectors.toSet());
 
         Map<Long, UserPublicDTO> dialogUsersMap = authorIds.stream()
                 .collect(Collectors.toMap(id -> id, authServiceClient::getUser));
 
         Map<Long, Message> messagesMap = messageList.stream()
-                .collect(Collectors.toMap(Message::getId, message -> message));
+                .collect(Collectors.toMap(m -> m.getId(), message -> message));
 
-        List<Long> messageIds = messageList.stream().map(Message::getId).toList();
+        List<Long> messageIds = messageList.stream().map(m -> m.getId()).toList();
         Map<Long, List<MessageReaction>> reactionsMap = messageReactionRepository.findByMessageIdIn(messageIds).stream()
                 .collect(Collectors.groupingBy(r -> r.getMessage().getId()));
 
@@ -85,10 +91,11 @@ public class MessageService {
     }
 
     @Transactional
+    @NonNull
     public MessageResponseDTO saveMessage(Long dialogId, Long userId, MessageCreateDTO dto, List<MultipartFile> files) {
-        Objects.requireNonNull(dialogId, "dialogId must not be null");
-        Objects.requireNonNull(userId, "userId must not be null");
-        Objects.requireNonNull(dto, "message payload must not be null");
+        Objects.requireNonNull(dialogId, VALIDATION_ERROR_DIALOG_ID_NULL);
+        Objects.requireNonNull(userId, VALIDATION_ERROR_USER_ID_NULL);
+        Objects.requireNonNull(dto, VALIDATION_ERROR_MESSAGE_PAYLOAD_EMPTY);
 
         String body = dto.body();
         boolean hasText = body != null && !body.trim().isEmpty();
@@ -103,7 +110,7 @@ public class MessageService {
             throw new ApiException(
                     HttpStatus.BAD_REQUEST,
                     "MESSAGE_EMPTY",
-                    "Message must contain text or at least one attachment"
+                    VALIDATION_ERROR_MESSAGE_PAYLOAD_EMPTY
             );
         }
 
@@ -153,9 +160,9 @@ public class MessageService {
 
     @Transactional
     public MessageResponseDTO deleteMessage(Long dialogId, Long messageId, Long userId) {
-        Objects.requireNonNull(dialogId, "dialogId must not be null");
-        Objects.requireNonNull(messageId, "messageId must not be null");
-        Objects.requireNonNull(userId, "userId must not be null");
+        Objects.requireNonNull(dialogId, VALIDATION_ERROR_DIALOG_ID_NULL);
+        Objects.requireNonNull(messageId, VALIDATION_ERROR_MESSAGE_ID_NULL);
+        Objects.requireNonNull(userId, VALIDATION_ERROR_USER_ID_NULL);
 
         UserPublicDTO user = authServiceClient.getUser(userId);
         Message message = getMessageFromDialog(dialogId, messageId, userId);
@@ -169,10 +176,10 @@ public class MessageService {
 
     @Transactional
     public MessageResponseDTO updateMessage(Long dialogId, Long messageId, Long userId, MessageUpdateDTO dto) {
-        Objects.requireNonNull(dialogId, "dialogId must not be null");
-        Objects.requireNonNull(messageId, "messageId must not be null");
-        Objects.requireNonNull(userId, "userId must not be null");
-        Objects.requireNonNull(dto, "message payload must not be null");
+        Objects.requireNonNull(dialogId, VALIDATION_ERROR_DIALOG_ID_NULL);
+        Objects.requireNonNull(messageId, VALIDATION_ERROR_MESSAGE_ID_NULL);
+        Objects.requireNonNull(userId, VALIDATION_ERROR_USER_ID_NULL);
+        Objects.requireNonNull(dto, VALIDATION_ERROR_MESSAGE_PAYLOAD_EMPTY);
 
         UserPublicDTO user = authServiceClient.getUser(userId);
 

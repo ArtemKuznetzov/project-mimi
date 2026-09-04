@@ -1,4 +1,4 @@
-import { useState, useRef, type ReactNode } from "react";
+import { useState, useRef, type ReactNode, useCallback, useMemo } from "react";
 import type { Toast } from "./ToastContext";
 import { ToastContext } from "./ToastContext";
 
@@ -6,11 +6,11 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const counterRef = useRef(0);
 
-  const removeToast = (id: string) => {
+  const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
+  }, []);
 
-  const addToast = (toast: Omit<Toast, "id">) => {
+  const addToast = useCallback((toast: Omit<Toast, "id">) => {
     const id = `toast-${++counterRef.current}`;
     const newToast: Toast = {
       ...toast,
@@ -26,7 +26,9 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
         removeToast(id);
       }, newToast.duration);
     }
-  };
+  }, []);
 
-  return <ToastContext.Provider value={{ toasts, addToast, removeToast }}>{children}</ToastContext.Provider>;
+  const value = useMemo(() => ({ toasts, addToast, removeToast }), [toasts, addToast, removeToast]);
+
+  return <ToastContext.Provider value={value}>{children}</ToastContext.Provider>;
 };

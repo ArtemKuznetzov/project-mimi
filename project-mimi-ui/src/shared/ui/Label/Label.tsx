@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 export type LabelProps = LabelHTMLAttributes<HTMLLabelElement>;
 
-const Label = forwardRef<HTMLLabelElement, LabelProps>(({ className, ...props }, ref) => {
+const Label = forwardRef<HTMLLabelElement, LabelProps>(({ className, children, ...props }, ref) => {
   return (
     <label
       ref={ref}
@@ -12,7 +12,9 @@ const Label = forwardRef<HTMLLabelElement, LabelProps>(({ className, ...props },
         className,
       )}
       {...props}
-    />
+    >
+      {children}
+    </label>
   );
 });
 Label.displayName = "Label";

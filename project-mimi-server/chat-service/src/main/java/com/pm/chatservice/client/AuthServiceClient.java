@@ -6,11 +6,10 @@ import com.pm.common.web.exception.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpHeaders;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
-
-import java.util.Objects;
 
 @Service
 public class AuthServiceClient {
@@ -18,7 +17,7 @@ public class AuthServiceClient {
     private final RequestUserContext requestUserContext;
 
     public AuthServiceClient(RestClient.Builder restClientBuilder,
-                             @Value("${auth.service.url}") String authServiceUrl,
+                             @Value("${auth.service.url}") @NonNull String authServiceUrl,
                              RequestUserContext requestUserContext) {
         this.restClient = restClientBuilder
                 .baseUrl(authServiceUrl)

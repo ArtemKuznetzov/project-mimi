@@ -15,6 +15,22 @@ type ImageBlockProps = {
   embeddedInBubble?: boolean;
 };
 
+type GetAlbumFrameClassProps = {
+  embeddedInBubble: boolean;
+  attachmentOnly: boolean;
+  isMine: boolean;
+};
+
+const getAlbumFrameClass = ({ 
+  embeddedInBubble, 
+  attachmentOnly, 
+  isMine 
+}: GetAlbumFrameClassProps): string => {
+  if (embeddedInBubble) return "w-full overflow-hidden";
+  if (attachmentOnly) return attachmentFrameClass(isMine);
+  return "overflow-hidden rounded-lg";
+}
+
 export const ImagesBlock = ({
   textAndAttachments,
   attachments,
@@ -32,7 +48,7 @@ export const ImagesBlock = ({
   const albumSizes = useAlbumNaturalSizes(sources);
   const loadedSizes = albumSizes.filter((s) => s !== null);
 
-  const placeholderSizes = Array(count)
+  const placeholderSizes = new Array(count)
     .fill(null)
     .map(() => ({ width: 1, height: 1 }));
   const layoutSizes = loadedSizes.length > 0 ? loadedSizes : placeholderSizes;
@@ -47,11 +63,7 @@ export const ImagesBlock = ({
       ? computeAlbumRowHeight(loadedSizes, cols)
       : undefined;
 
-  const frameClass = embeddedInBubble
-    ? "w-full overflow-hidden"
-    : attachmentOnly
-      ? attachmentFrameClass(isMine)
-      : "overflow-hidden rounded-lg";
+  const frameClass = getAlbumFrameClass({ embeddedInBubble, attachmentOnly, isMine });
 
   const gapClass = isSingle ? "" : "gap-0.5";
 
@@ -84,7 +96,8 @@ export const ImagesBlock = ({
           const src = mediaViewUrl(att.objectName);
 
           return (
-            <div
+            <button
+              type="button"
               key={att.objectName}
               className={cn(!isSingle && "min-h-0 min-w-0")}
               onClick={() => setOpenedImgIndex(i)}
@@ -101,7 +114,7 @@ export const ImagesBlock = ({
                 fillBubbleWidth={isSingle && embeddedInBubble}
                 className={cn(isSingle && !embeddedInBubble && "rounded-2xl", isSingle && embeddedInBubble && "w-full", "cursor-pointer")}
               />
-            </div>
+            </button>
           );
         })}
         <ImageGalleryModal isOpen={openedImgIndex != null} onClose={() => setOpenedImgIndex(null)} images={sources} initialIndex={openedImgIndex || 0} />

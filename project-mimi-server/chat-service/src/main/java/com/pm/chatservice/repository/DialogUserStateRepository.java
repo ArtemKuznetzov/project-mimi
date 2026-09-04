@@ -5,9 +5,7 @@ import com.pm.chatservice.entity.id.DialogUserStateId;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 
-@Repository
 public interface DialogUserStateRepository extends JpaRepository<DialogUserState, DialogUserStateId> {
     @Query("""
             select min(coalesce(state.lastReadMessageId, 0))

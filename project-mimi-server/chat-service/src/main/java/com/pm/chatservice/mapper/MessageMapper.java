@@ -8,6 +8,7 @@ import com.pm.chatservice.entity.Message;
 import com.pm.chatservice.entity.MessageAttachment;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.springframework.lang.NonNull;
 
 import java.util.List;
 
@@ -26,6 +27,7 @@ public interface MessageMapper {
     @Mapping(target = "replyMessage", source = "replyMessage")
     @Mapping(target = "attachments", source = "message.attachments")
     @Mapping(target = "messageReactions",source = "messageReactions")
+    @NonNull
     MessageResponseDTO toDto(Message message, Long dialogId, UserPublicDTO user, String clientId, MessageResponseDTO replyMessage, List<MessageReactionResponseDTO.ReactionGroup> messageReactions);
 
     AttachmentResponseDTO toAttachmentDto(MessageAttachment a);

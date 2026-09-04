@@ -49,18 +49,23 @@ export const BaseModal = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-      onClick={closeOnOverlayClick ? onClose : undefined}
-      role="dialog"
-      aria-modal="true"
-      aria-label={title}
-    >
-      <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      {closeOnOverlayClick && (
+        <button
+          type="button"
+          className="absolute inset-0"
+          aria-label="Close dialog"
+          onClick={onClose}
+        />
+      )}
+      <dialog
+        aria-modal="true"
+        aria-label={title}
+        open={isOpen}
         className={cn(
-          'flex min-h-96 min-w-96 flex-col gap-4 rounded-lg border border-gray-200 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-900',
+          'flex relative z-10 min-h-96 min-w-96 flex-col gap-4 rounded-lg border border-gray-200 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-900',
           contentClassName,
         )}
-        onClick={(e) => e.stopPropagation()}
       >
         {!hideCloseButton && (
           <div className="flex justify-end">
@@ -70,7 +75,7 @@ export const BaseModal = ({
           </div>
         )}
         {children}
-      </div>
+      </dialog>
     </div>
   );
 };

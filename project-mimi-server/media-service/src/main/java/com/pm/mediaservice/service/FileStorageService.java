@@ -37,6 +37,7 @@ public class FileStorageService {
     private static final String DEFAULT_FILENAME = "file";
     private static final String META_ORIGINAL_FILENAME = "original-filename";
     private static final String META_EXTENSION = "extension";
+    private static final String NO_SUCH_KEY = "NoSuchKey";
 
     private final MinioClient minioClient;
 
@@ -144,7 +145,7 @@ public class FileStorageService {
                     .toList();
 
             CompletableFuture.allOf(uploadTasks.toArray(CompletableFuture[]::new)).join();
-            return uploadTasks.stream().map(CompletableFuture::join).toList();
+            return uploadTasks.stream().map(s -> s.join()).toList();
         }
     }
 
@@ -159,7 +160,7 @@ public class FileStorageService {
             );
             return new DownloadedFile(response);
         } catch (ErrorResponseException e) {
-            if ("NoSuchKey".equals(e.errorResponse().code())) {
+            if (NO_SUCH_KEY.equals(e.errorResponse().code())) {
                 throw new ApiException(HttpStatus.NOT_FOUND, "FILE_NOT_FOUND", "File not found.");
             }
             log.error("MinIO error downloading file '{}': {}", objectName, e.getMessage());
@@ -195,7 +196,7 @@ public class FileStorageService {
                     stat.size()
             );
         } catch (ErrorResponseException e) {
-            if ("NoSuchKey".equals(e.errorResponse().code())) {
+            if (NO_SUCH_KEY.equals(e.errorResponse().code())) {
                 throw new ApiException(HttpStatus.NOT_FOUND, "FILE_NOT_FOUND", "File not found.");
             }
             log.error("MinIO error fetching file info '{}': {}", objectName, e.getMessage());
@@ -219,7 +220,7 @@ public class FileStorageService {
             );
             log.info("File '{}' deleted successfully from bucket '{}'", objectName, bucketName);
         } catch (ErrorResponseException e) {
-            if ("NoSuchKey".equals(e.errorResponse().code())) {
+            if (NO_SUCH_KEY.equals(e.errorResponse().code())) {
                 throw new ApiException(HttpStatus.NOT_FOUND, "FILE_NOT_FOUND", "File not found.");
             }
             log.error("MinIO error deleting file '{}': {}", objectName, e.getMessage());

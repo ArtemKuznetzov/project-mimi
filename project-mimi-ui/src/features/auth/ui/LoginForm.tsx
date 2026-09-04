@@ -49,10 +49,8 @@ export const LoginForm = () => {
       if (result.accessToken && typeof result.accessToken === "string" && result.accessToken.trim() !== "") {
         dispatch(setAccessToken(result.accessToken));
         navigate("/");
-      } else {
-        if (import.meta.env.DEV) {
+      } else if (import.meta.env.DEV) {
           console.error("Invalid token response from server");
-        }
       }
     } catch (err) {
       if (import.meta.env.DEV) {

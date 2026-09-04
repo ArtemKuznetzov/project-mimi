@@ -13,7 +13,7 @@ type MessageBubbleProps = {
   isMine: boolean;
   status: MessageStatus | null;
   scrollToMessage: (id: number) => void;
-  onToggleReaction?: MessageListProps["messageActions"]["onToggleReaction"];
+  onToggleReaction: MessageListProps["messageActions"]["onToggleReaction"];
   className?: string;
 };
 
@@ -55,7 +55,7 @@ export const MessageBubble = ({ message, isMine, status, className, scrollToMess
     <div
       className={cn("group relative flex min-w-0 max-w-full flex-col gap-1", isMine ? "items-end" : "items-start", className)}
     >
-      {attachmentOnly ? (
+      {attachmentOnly && (
         <div className="flex w-fit max-w-full min-w-0 flex-col gap-2">
           <ReplyBlock
             isMine={isMine}
@@ -70,8 +70,9 @@ export const MessageBubble = ({ message, isMine, status, className, scrollToMess
             isMine={isMine}
           />
         </div>
-      ) : textAndAttachments ? (
-        <div className={cn(bubbleShell(isMine, isDeleted), "p-0")}>
+      )}
+      {textAndAttachments && (
+        <div className={cn(bubbleShell(isMine, isDeleted), "overflow-hidden p-0")}>
           {replyMessage && !isDeleted ? (
             <div className="px-3 pt-2">
               <ReplyBlock isMine={isMine} isDeleted={isDeleted} replyMessage={replyMessage} onClick={scrollToMessage} />
@@ -88,7 +89,8 @@ export const MessageBubble = ({ message, isMine, status, className, scrollToMess
             <TextBlock text={trimmedBody} isDeleted={isDeleted} />
           </div>
         </div>
-      ) : (
+      )}
+      {!attachmentOnly && !textAndAttachments && (
         <div className={cn("flex w-fit min-w-0 max-w-full flex-col gap-2", isMine ? "items-end" : "items-start")}>
           {(hasText || isDeleted || replyMessage) && (
             <div className="relative">

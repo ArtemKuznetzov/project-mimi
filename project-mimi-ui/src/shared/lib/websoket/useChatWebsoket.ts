@@ -160,7 +160,7 @@ export const useChatWebsoket = ({ dialogId, onMessage, onReadReceipt, handleReac
   const sendMessage = useCallback(
     (payload: MessageCreatePayload) => {
       const client = clientRef.current;
-      if (!client || !client.connected) {
+      if (!client?.connected) {
         return false;
       }
       client.publish({
@@ -175,7 +175,7 @@ export const useChatWebsoket = ({ dialogId, onMessage, onReadReceipt, handleReac
   const sendUpdateMessage = useCallback(
     (dialogId: number, messageId: number, body: string) => {
       const client = clientRef.current;
-      if (!client || !client.connected) {
+      if (!client?.connected) {
         return false;
       }
       client.publish({
@@ -190,7 +190,7 @@ export const useChatWebsoket = ({ dialogId, onMessage, onReadReceipt, handleReac
   const sendDeleteMessage = useCallback(
     (dialogId: number, messageId: number) => {
       const client = clientRef.current;
-      if (!client || !client.connected) {
+      if (!client?.connected) {
         return false;
       }
       client.publish({
@@ -205,7 +205,7 @@ export const useChatWebsoket = ({ dialogId, onMessage, onReadReceipt, handleReac
   const sendToggleReaction = useCallback(
     (dialogId: number, messageId: number, reaction: MessageReactionDTO) => {
       const client = clientRef.current;
-      if (!client || !client.connected) {
+      if (!client?.connected) {
         return false
       }
       client.publish({

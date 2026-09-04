@@ -10,9 +10,9 @@ type ReplyBlockProps = {
 
 export const ReplyBlock = ({ isMine, isDeleted, replyMessage, onClick }: ReplyBlockProps) => {
   return !isDeleted && replyMessage ? (
-    <div className={replySnippetClass(isMine)} onClick={() => onClick(replyMessage.id)}>
+    <button type="button" className={replySnippetClass(isMine)} onClick={() => onClick(replyMessage.id)}>
       <div className="truncate font-medium">{replyMessage.userName}</div>
       <div className="truncate opacity-80">{replyMessage.body}</div>
-    </div>
+    </button>
   ) : null;
 };

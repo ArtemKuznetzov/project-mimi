@@ -1,13 +1,11 @@
 package com.pm.mediaservice.controller;
 
-import com.pm.common.web.exception.ApiException;
 import com.pm.mediaservice.dto.MediaFileInfoDTO;
 import com.pm.mediaservice.service.DownloadedFile;
 import com.pm.mediaservice.service.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -7,7 +7,6 @@ export function useAlbumNaturalSizes(sources: string[]): (NaturalSize | null)[] 
 
   useEffect(() => {
     if (sources.length === 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSizes([]);
       return;
     }
@@ -17,7 +16,7 @@ export function useAlbumNaturalSizes(sources: string[]): (NaturalSize | null)[] 
     const version = currentVersion.current;
 
     // Sync size with new sources appeared
-    setSizes(Array(sources.length).fill(null));
+    setSizes(new Array(sources.length).fill(null));
 
     sources.forEach((src, index) => {
       const img = new Image();
@@ -43,7 +42,7 @@ export function useAlbumNaturalSizes(sources: string[]): (NaturalSize | null)[] 
     return () => {
       currentVersion.current += 1;
     };
-    // eslint-disable-next-line
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(sources)]);
 
   return sizes;

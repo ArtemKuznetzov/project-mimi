@@ -50,23 +50,16 @@ export const useDialogMessagesState = ({
         const current = prev[dialogId] ?? [];
         const existsInLive = current.some((item) => item.id === message.id);
         const existsInInitial = messagesData.some((item) => item.id === message.id);
-        if (action !== "send") {
-          if (existsInLive) {
-            return {
-              ...prev,
-              [dialogId]: current.map((item) => (item.id === message.id ? message : item)),
-            };
-          }
-          return {
-            ...prev,
-            [dialogId]: [...current, message],
-          };
-        }
-
-        if (existsInLive || existsInInitial) {
+        
+        if (action === "send" && (existsInLive || existsInInitial)) {
           return prev;
         }
-
+        if (existsInLive) {
+          return {
+            ...prev,
+            [dialogId]: current.map((item) => (item.id === message.id ? message : item)),
+          };
+        }
         return {
           ...prev,
           [dialogId]: [...current, message],
@@ -95,22 +88,34 @@ export const useDialogMessagesState = ({
     [dialogId, messagesData, currentUserId, listHandleRef],
   );
 
-  const handleReaction = useCallback((reactions: MessageReactionResponseDTO) => {
-    if (reactions.reactions.length === 0) {
-      return;
-    }
+  const handleReaction = useCallback((responseReactions: MessageReactionResponseDTO) => {
+    const nextReactions = responseReactions.reactions ?? [];
+
     setLiveMessagesByDialog((prev) => {
-      const messages = prev[dialogId] ?? [];
-      const currentMessage = messages.find((msg) => msg.id === reactions.messageId);
-      if (!currentMessage) {
+      const live = prev[dialogId] ?? [];
+      const fromLive = live.find(msg => msg.id === responseReactions.messageId);
+      const fromInitial = messagesData.find(msg => msg.id === responseReactions.messageId);
+      const base = fromLive ?? fromInitial;
+
+      if (!base) {
         return prev;
+      }
+
+      const updated = { ...base, messageReactions: nextReactions };
+      const existsInLive = fromLive != null;
+
+      if (existsInLive) {
+        return {
+          ...prev,
+          [dialogId]: live.map(msg => msg.id === responseReactions.messageId ? updated : msg),
+        };
       }
       return {
         ...prev,
-        [dialogId]: messages.map((msg) => (msg.id === reactions.messageId ? { ...msg, reactions: reactions.reactions } : msg)),
+        [dialogId]: [...live, updated],
       };
     });
-  }, [dialogId]);
+  }, [dialogId, messagesData]);
 
   const { sendUpdateMessage, sendDeleteMessage, sendToggleReaction } = useChatWebsoket({
     dialogId,
@@ -212,7 +217,7 @@ export const useDialogMessagesState = ({
 
   useLayoutEffect(() => {
     const local = localMessagesByDialog[dialogId] ?? [];
-    const last = local[local.length - 1];
+    const last = local.at(-1);
     if (last?.clientId && last.clientId === pendingScrollRef.current) {
       listHandleRef.current?.scrollToBottom("smooth");
       pendingScrollRef.current = null;

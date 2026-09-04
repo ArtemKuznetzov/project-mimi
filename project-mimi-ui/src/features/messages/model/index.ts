@@ -1,9 +1,9 @@
-import {attachmentFrameClass, replySnippetClass, bubbleShell} from './lib/styles'
-import {getStatusIcon} from './lib/icons'
-
 export {
-  attachmentFrameClass, replySnippetClass, bubbleShell, getStatusIcon
-}
+  attachmentFrameClass, 
+  replySnippetClass, 
+  bubbleShell
+} from './lib/styles'
+export { getStatusIcon } from './lib/icons'
 
 export {
   BUBBLE_MEDIA_MAX_WIDTH,

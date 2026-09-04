@@ -8,16 +8,18 @@ import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
 
 @Component
 public class JwtValidationGatewayFilterFactory extends AbstractGatewayFilterFactory<Object> {
+    private static final String BEARER_PREFIX = "Bearer ";
     private static final Logger log = LoggerFactory.getLogger(JwtValidationGatewayFilterFactory.class);
     private final WebClient webClient;
 
-    public JwtValidationGatewayFilterFactory(WebClient.Builder webClientBuilder, @Value("${auth.service.url}") String authServiceUrl) {
+    public JwtValidationGatewayFilterFactory(WebClient.Builder webClientBuilder, @Value("${auth.service.url}") @NonNull String authServiceUrl) {
         this.webClient = webClientBuilder.baseUrl(authServiceUrl).build();
     }
     @Override
@@ -29,7 +31,7 @@ public class JwtValidationGatewayFilterFactory extends AbstractGatewayFilterFact
                 return exchange.getResponse().setComplete();
             }
 
-            String authHeader = "Bearer " + tokenValue;
+            String authHeader = BEARER_PREFIX + tokenValue;
             return webClient.get()
                     .uri("/validate")
                     .header(HttpHeaders.AUTHORIZATION, authHeader)
@@ -58,7 +60,7 @@ public class JwtValidationGatewayFilterFactory extends AbstractGatewayFilterFact
 
     private String resolveToken(ServerWebExchange exchange) {
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+        if (authHeader != null && authHeader.startsWith(BEARER_PREFIX)) {
             return authHeader.substring(7);
         }
 
@@ -69,7 +71,7 @@ public class JwtValidationGatewayFilterFactory extends AbstractGatewayFilterFact
             return null;
         }
 
-        if (tokenParam.startsWith("Bearer ")) {
+        if (tokenParam.startsWith(BEARER_PREFIX)) {
             return tokenParam.substring(7);
         }
 
