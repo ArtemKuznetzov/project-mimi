@@ -39,6 +39,7 @@ public class Message {
             joinColumns = @JoinColumn(name = "message_id")
     )
     @OrderColumn(name = "attachment_order")
+    @Builder.Default
     private List<MessageAttachment> attachments = new ArrayList<>();
 
     @Column(name = "created_at")

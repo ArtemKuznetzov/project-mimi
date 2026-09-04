@@ -28,9 +28,9 @@ public class MessageController {
     @PostMapping(value = "/{dialogId}/message/send", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<MessageResponseDTO> sendMessage(
             @PathVariable Long dialogId,
-            @RequestParam(value = "body", required = false) String body,
-            @RequestParam(value = "replyMessageId", required = false) Long replyMessageId,
-            @RequestParam(value = "clientId", required = false) String clientId,
+            @RequestParam(required = false) String body,
+            @RequestParam(required = false) Long replyMessageId,
+            @RequestParam(required = false) String clientId,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @AuthenticationPrincipal Long userId) {
         MessageCreateDTO dto = new MessageCreateDTO(body, clientId, replyMessageId);

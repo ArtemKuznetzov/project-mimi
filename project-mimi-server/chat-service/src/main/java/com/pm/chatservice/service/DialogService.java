@@ -59,8 +59,8 @@ public class DialogService {
                     .orElse(null);
 
             userId = otherUserId;
-            userName = Optional.ofNullable(otherUser).map(UserPublicDTO::getDisplayName).orElse(null);
-            userAvatarId = Optional.ofNullable(otherUser).map(UserPublicDTO::getAvatarId).orElse(null);
+            userName = Optional.ofNullable(otherUser).map(u -> u.getDisplayName()).orElse(null);
+            userAvatarId = Optional.ofNullable(otherUser).map(u -> u.getAvatarId()).orElse(null);
         } else {
             userId = null;
             userName = dialogData.dialogTitle();

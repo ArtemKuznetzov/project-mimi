@@ -1,7 +1,8 @@
-import { useImageNaturalSize } from "@/features/messages/model/lib/useImageNaturalSize";
+import { useImageNaturalSize, type NaturalSize } from "@/features/messages/model/lib/useImageNaturalSize";
 import { fitSingleMediaSize } from "@/features/messages/model";
 import { cn } from "@/lib/utils";
 import { chatTokens } from "@/features/messages/model/lib/chatTokens";
+import type { CSSProperties } from "react";
 
 type MediaImageProps = {
   src: string;
@@ -12,6 +13,43 @@ type MediaImageProps = {
   fillBubbleWidth?: boolean;
   className?: string;
 };
+
+type GetMediaBoxStyleProps = {
+  isSingle: boolean;
+  natural: NaturalSize | null;
+  singleSize: { width: number; height: number } | null;
+  fillBubbleWidth: boolean | undefined;
+  tileHeight: number | undefined;
+};
+
+const getMediaBoxStyle = ({ 
+  isSingle, 
+  natural, 
+  singleSize, 
+  fillBubbleWidth, 
+  tileHeight 
+}: GetMediaBoxStyleProps): CSSProperties => {
+  if (!isSingle) {
+    return tileHeight
+      ? { width: "100%", height: tileHeight }
+      : { width: "100%", aspectRatio: "4 / 3" };
+  }
+  if (!natural) {
+    return { width: "100%", minHeight: 150 };
+  }
+  if (fillBubbleWidth) {
+    return {
+      width: "100%",
+      aspectRatio: `${natural.width} / ${natural.height}`,
+      maxHeight: 380,
+      maxWidth: 280,
+    };
+  }
+  if (singleSize) {
+    return { width: singleSize.width, height: singleSize.height, maxWidth: "100%" };
+  }
+  return {};
+}
 
 export const MediaImage = ({ src, alt, mode, tileHeight, fillBubbleWidth, className }: MediaImageProps) => {
   const natural = useImageNaturalSize(src);
@@ -24,18 +62,7 @@ export const MediaImage = ({ src, alt, mode, tileHeight, fillBubbleWidth, classN
       className={cn("relative overflow-hidden dark:bg-[#2A3942]", !natural && "animate-pulse", className)}
       style={{
         backgroundColor: !natural ? undefined : chatTokens.mediaPlaceholder.light,
-        ...(isSingle && singleSize ? { width: singleSize.width, height: singleSize.height, maxWidth: "100%" } : {}),
-        ...(isSingle && fillBubbleWidth && natural
-          ? {
-              width: "100%",
-              aspectRatio: `${natural.width} / ${natural.height}`,
-              maxHeight: 380,
-              maxWidth: 280
-            }
-          : {}),
-        ...(!isSingle && tileHeight ? { width: "100%", height: tileHeight } : {}),
-        ...(!isSingle && !tileHeight ? { width: "100%", aspectRatio: "4 / 3" } : {}),
-        ...(!natural && isSingle ? { width: "100%", minHeight: 150 } : {}),
+        ...getMediaBoxStyle({ isSingle, natural, singleSize, fillBubbleWidth, tileHeight })
       }}
     >
       <img

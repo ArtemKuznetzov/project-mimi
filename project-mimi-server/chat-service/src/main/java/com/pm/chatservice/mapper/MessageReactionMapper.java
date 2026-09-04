@@ -2,23 +2,23 @@ package com.pm.chatservice.mapper;
 
 import com.pm.chatservice.dto.MessageReactionResponseDTO;
 import com.pm.chatservice.entity.MessageReaction;
-import org.mapstruct.Mapper;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring")
-public interface MessageReactionMapper {
-    default List<MessageReactionResponseDTO.ReactionGroup> toDto(List<MessageReaction> messageReactions) {
+@Component 
+public class MessageReactionMapper {
+    public List<MessageReactionResponseDTO.ReactionGroup> toDto(List<MessageReaction> messageReactions) {
         if (messageReactions == null || messageReactions.isEmpty()) {
             return List.of();
         }
         return messageReactions.stream()
-                .collect(Collectors.groupingBy(MessageReaction::getEmoji))
+                .collect(Collectors.groupingBy(r -> r.getEmoji()))
                 .entrySet().stream()
                 .map(e -> new MessageReactionResponseDTO.ReactionGroup(
                         e.getKey(),
-                        e.getValue().stream().map(MessageReaction::getUserId).toList()
+                        e.getValue().stream().map(r -> r.getUserId()).toList()
                 ))
                 .toList();
     }

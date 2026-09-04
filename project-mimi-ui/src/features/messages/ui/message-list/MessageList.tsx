@@ -43,6 +43,22 @@ export type MessageListProps = {
   onCloseReply: () => void;
 };
 
+const getStatus = (message: UiMessage, isMine: boolean, lastReadMessageId: number): MessageStatus | null => {
+  if (isMine) {
+    if (message.localStatus === "failed") {
+      return "failed";
+    }
+    if (message.localStatus === "pending") {
+      return "pending";
+    }
+    if (message.id > 0 && message.id <= lastReadMessageId) {
+      return "read";
+    }
+    return "sent";
+  }
+  return null;
+};
+
 export const MessageList = forwardRef<MessageListHandle, MessageListProps>(
   ({
     messages,
@@ -259,15 +275,8 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(
           {messages.map((message: UiMessage) => {
             const isMine = currentUserId !== null && message.userId === currentUserId;
             const shouldObserve = !isMine && message.id > 0;
-            const status: MessageStatus | null = isMine
-              ? message.localStatus === "failed"
-                ? "failed"
-                : message.localStatus === "pending"
-                  ? "pending"
-                  : message.id > 0 && message.id <= readBoundary
-                    ? "read"
-                    : "sent"
-              : null;
+            const status = getStatus(message, isMine, readBoundary);
+
             return (
               <li
                 key={message.id}

@@ -7,12 +7,12 @@ interface IMessageReactionsProps {
   reactions: MessageResponseDTO["messageReactions"];
   messageId: number;
   isMine: boolean;
+  onToggleReaction: MessageListProps["messageActions"]["onToggleReaction"];
   className?: string;
-  onToggleReaction?: MessageListProps["messageActions"]["onToggleReaction"];
 }
 
 const MessageReactions = ({
-  reactions = [],
+  reactions,
   isMine,
   onToggleReaction,
   className,
@@ -22,11 +22,13 @@ const MessageReactions = ({
     onToggleReaction?.(messageId, { emoji });
   };
 
+  const messagesReactions = reactions ?? [];
+
   return (
     <div className={className}>
-      {reactions.length > 0 && (
+      {messagesReactions.length > 0 && (
         <div className="flex flex-wrap gap-1 pt-1">
-          {reactions.map((reaction) => {
+          {messagesReactions.map((reaction) => {
             const counter = reaction.userIds?.length ?? 0;
 
             return (

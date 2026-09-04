@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +41,7 @@ public class MessageReactionService {
                     .emoji(messageReactionDTO.emoji())
                     .createdAt(Instant.now())
                     .build();
-            messageReactionRepository.save(messageReaction);
+            messageReactionRepository.save(Objects.requireNonNull(messageReaction, "messageReaction"));
         }
         List<MessageReaction> reactions = messageReactionRepository.findByMessageId(messageId);
         List<MessageReactionResponseDTO.ReactionGroup> reactionsDto = messageReactionMapper.toDto(reactions);

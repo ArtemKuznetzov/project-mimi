@@ -58,7 +58,7 @@ export const MessagesPage = () => {
     onDeleteMessage,
     onToggleReaction,
     onSelectMessage: (message, action) => setSelectedMessage({...message, action})
-  }), [onDeleteMessage, onReadCandidate])
+  }), [onDeleteMessage, onReadCandidate, onToggleReaction])
 
   return (
     <div className="space-y-6">
