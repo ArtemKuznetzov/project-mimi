@@ -2,6 +2,9 @@ package com.pm.common.web.error;
 
 import com.pm.common.web.exception.ApiException;
 import jakarta.servlet.http.HttpServletRequest;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -11,14 +14,18 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+     
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ErrorResponse> handleApiException(ApiException ex, HttpServletRequest request) {
         log.warn("ApiException [{}] at {}: {}", ex.getCode(), request.getRequestURI(), ex.getMessage());
         return ResponseEntity
-                .status(ex.getStatus())
+                .status(ex.getStatus().value())
                 .body(ErrorResponse.of(ex.getStatus(), ex.getCode(), ex.getMessage(), request.getRequestURI(), ex.getDetail()));
     }
 
@@ -50,7 +57,7 @@ public class GlobalExceptionHandler {
                                                                       HttpServletRequest request) {
         HttpStatus status = HttpStatus.valueOf(ex.getStatusCode().value());
         String code = status.name();
-        String message = ex.getBody() != null ? ex.getBody().getDetail() : ex.getMessage();
+        String message = Objects.requireNonNullElse(ex.getBody().getDetail(), ex.getMessage());
         log.warn("ErrorResponseException [{}] at {}: {}", status, request.getRequestURI(), message);
         return ResponseEntity
                 .status(status)

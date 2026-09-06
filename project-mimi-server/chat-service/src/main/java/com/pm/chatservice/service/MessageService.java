@@ -37,7 +37,7 @@ public class MessageService {
     private static final String VALIDATION_ERROR_DIALOG_ID_NULL = "dialogId must not be null";
     private static final String VALIDATION_ERROR_MESSAGE_ID_NULL = "messageId must not be null";
     private static final String VALIDATION_ERROR_USER_ID_NULL = "userId must not be null";
-    private static final String VALIDATION_ERROR_MESSAGE_PAYLOAD_EMPTY = "Message must contain text or at least one attachment";
+    private static final String VALIDATION_ERROR_DTO_NULL = "Message payload must not be null";
 
     private final MessageRepository messageRepository;
     private final AuthServiceClient authServiceClient;
@@ -95,7 +95,7 @@ public class MessageService {
     public MessageResponseDTO saveMessage(Long dialogId, Long userId, MessageCreateDTO dto, List<MultipartFile> files) {
         Objects.requireNonNull(dialogId, VALIDATION_ERROR_DIALOG_ID_NULL);
         Objects.requireNonNull(userId, VALIDATION_ERROR_USER_ID_NULL);
-        Objects.requireNonNull(dto, VALIDATION_ERROR_MESSAGE_PAYLOAD_EMPTY);
+        Objects.requireNonNull(dto, VALIDATION_ERROR_DTO_NULL);
 
         String body = dto.body();
         boolean hasText = body != null && !body.trim().isEmpty();
@@ -110,7 +110,7 @@ public class MessageService {
             throw new ApiException(
                     HttpStatus.BAD_REQUEST,
                     "MESSAGE_EMPTY",
-                    VALIDATION_ERROR_MESSAGE_PAYLOAD_EMPTY
+                    "Message must contain text or at least one attachment"
             );
         }
 
@@ -179,7 +179,7 @@ public class MessageService {
         Objects.requireNonNull(dialogId, VALIDATION_ERROR_DIALOG_ID_NULL);
         Objects.requireNonNull(messageId, VALIDATION_ERROR_MESSAGE_ID_NULL);
         Objects.requireNonNull(userId, VALIDATION_ERROR_USER_ID_NULL);
-        Objects.requireNonNull(dto, VALIDATION_ERROR_MESSAGE_PAYLOAD_EMPTY);
+        Objects.requireNonNull(dto, VALIDATION_ERROR_DTO_NULL);
 
         UserPublicDTO user = authServiceClient.getUser(userId);
 
